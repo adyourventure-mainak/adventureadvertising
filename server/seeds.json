@@ -1,0 +1,167 @@
+{
+  "_readme": [
+    "One row per campaign in assets/data.js, keyed by the same slug.",
+    "",
+    "videoId       — the brand's own upload. Pinned = 1 quota unit and zero guesswork.",
+    "officialChannel — the channel title that must match for a live count to be trusted.",
+    "                  Third-party re-uploads carry a fraction of an ad's real reach, so",
+    "                  an unverified match is reported but never allowed to overwrite the",
+    "                  editorial estimate in assets/data.js.",
+    "skipResolve   — true where the brand's own upload no longer exists or is unlisted.",
+    "                Checked by hand on 2026-07-28: searching the brand's own channel",
+    "                returns nothing for these. Stops the resolver burning 100 quota",
+    "                units a day looking for a video that is not there. If a brand",
+    "                re-uploads, set videoId and flip this to false.",
+    "metaPage      — the Facebook Page name to look up in the Meta Ad Library.",
+    "origin — where the campaign was made. Drives the globe markers and the country grouping on the sign-in screen."
+  ],
+  "ads": [
+    {
+      "id": "dumb-ways",
+      "videoId": "IJNR2EpS0jw",
+      "officialChannel": "Dumb Ways to Die",
+      "query": "Dumb Ways to Die official",
+      "metaPage": "Dumb Ways to Die",
+      "origin": {
+        "city": "Melbourne",
+        "country": "Australia",
+        "lat": -37.81,
+        "lon": 144.96
+      }
+    },
+    {
+      "id": "purple-egg",
+      "videoId": "4BvwpjaGZCQ",
+      "officialChannel": "Purple",
+      "query": "Purple mattress raw egg test Goldilocks",
+      "metaPage": "Purple",
+      "origin": {
+        "city": "Lehi",
+        "country": "United States",
+        "lat": 40.39,
+        "lon": -111.85
+      }
+    },
+    {
+      "id": "volvo-split",
+      "videoId": "M7FIvfx5J10",
+      "officialChannel": "Volvo Trucks",
+      "query": "Volvo Trucks The Epic Split Van Damme",
+      "metaPage": "Volvo Trucks",
+      "origin": {
+        "city": "Gothenburg",
+        "country": "Sweden",
+        "lat": 57.71,
+        "lon": 11.97
+      }
+    },
+    {
+      "id": "old-spice",
+      "videoId": "owGykVbfgUE",
+      "officialChannel": "Old Spice",
+      "query": "Old Spice The Man Your Man Could Smell Like",
+      "metaPage": "Old Spice",
+      "origin": {
+        "city": "Cincinnati",
+        "country": "United States",
+        "lat": 39.1,
+        "lon": -84.51
+      }
+    },
+    {
+      "id": "squatty-potty",
+      "videoId": "YbYWhdLO43Q",
+      "officialChannel": "Squatty Potty",
+      "query": "Squatty Potty unicorn ad",
+      "metaPage": "Squatty Potty",
+      "origin": {
+        "city": "St. George",
+        "country": "United States",
+        "lat": 37.1,
+        "lon": -113.58
+      }
+    },
+    {
+      "id": "dollar-shave",
+      "videoId": "ZUG9qYTJMsI",
+      "officialChannel": "Dollar Shave Club",
+      "query": "DollarShaveClub.com Our Blades Are F***ing Great",
+      "metaPage": "Dollar Shave Club",
+      "origin": {
+        "city": "Los Angeles",
+        "country": "United States",
+        "lat": 34.05,
+        "lon": -118.24
+      }
+    },
+    {
+      "id": "blendtec",
+      "videoId": "qg1ckCkm8YI",
+      "officialChannel": "Will It Blend",
+      "query": "Will It Blend iPhone",
+      "metaPage": "Blendtec",
+      "origin": {
+        "city": "Orem",
+        "country": "United States",
+        "lat": 40.3,
+        "lon": -111.69
+      }
+    },
+    {
+      "id": "turkish-kobe-messi",
+      "videoId": null,
+      "skipResolve": true,
+      "officialChannel": "Turkish Airlines",
+      "query": "Turkish Airlines Kobe Messi selfie shootout",
+      "metaPage": "Turkish Airlines"
+    },
+    {
+      "id": "always-likeagirl",
+      "videoId": null,
+      "skipResolve": true,
+      "officialChannel": "Always",
+      "query": "Always Like A Girl",
+      "metaPage": "Always"
+    },
+    {
+      "id": "dove-sketches",
+      "videoId": null,
+      "skipResolve": true,
+      "officialChannel": "Dove",
+      "query": "Dove Real Beauty Sketches",
+      "metaPage": "Dove"
+    },
+    {
+      "id": "nike-dream-crazy",
+      "videoId": null,
+      "skipResolve": true,
+      "officialChannel": "Nike",
+      "query": "Nike Dream Crazy",
+      "metaPage": "Nike"
+    },
+    {
+      "id": "john-lewis-moon",
+      "videoId": null,
+      "skipResolve": true,
+      "officialChannel": "John Lewis",
+      "query": "John Lewis Man on the Moon 2015 advert",
+      "metaPage": "John Lewis"
+    },
+    {
+      "id": "android-friends",
+      "videoId": null,
+      "skipResolve": true,
+      "officialChannel": "Android",
+      "query": "Android Friends Furever",
+      "metaPage": "Android"
+    },
+    {
+      "id": "geico-unskippable",
+      "videoId": null,
+      "skipResolve": true,
+      "officialChannel": "GEICO",
+      "query": "GEICO Unskippable Family",
+      "metaPage": "GEICO"
+    }
+  ]
+}

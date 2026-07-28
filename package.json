@@ -1,0 +1,15 @@
+{
+  "name": "adventure-advertising",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The internet's most-watched ads, reverse-engineered — with live data from the YouTube Data API and the Meta Ad Library.",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "health": "node -e \"fetch('http://localhost:8123/api/health').then(r=>r.json()).then(o=>console.log(JSON.stringify(o,null,2)))\"",
+    "meta:check": "node server/metacheck.js",
+    "refresh": "node -e \"fetch('http://localhost:8123/api/library?refresh=1').then(r=>r.json()).then(o=>console.log(o.live?('refreshed '+Object.keys(o.stats).length+' entries'):o.reason))\""
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {}
+}
