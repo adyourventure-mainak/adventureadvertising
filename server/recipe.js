@@ -68,7 +68,17 @@ function validate(parsed, material) {
     if (!b.label || !b.note) return 'beat missing label/note';
     if (b.note.length > 240) return 'beat note implausibly specific for metadata-only source';
   }
-  if (!Array.isArray(parsed.groundedIn) || !parsed.groundedIn.length) return 'no grounding citations';
+  /* The model cites in one of two shapes, unpredictably: a top-level
+     groundedIn array, or a groundedIn array inside each beat. Both are
+     honest work — accept either rather than rejecting good output for
+     putting its citations in the wrong drawer. */
+  const citations = [
+    ...(Array.isArray(parsed.groundedIn) ? parsed.groundedIn : []),
+    ...parsed.beats.flatMap(b => Array.isArray(b.groundedIn) ? b.groundedIn : [])
+  ].map(String).filter(Boolean);
+
+  if (!citations.length) return 'no grounding citations';
+  parsed._citations = citations;   /* reuse below rather than re-deriving */
 
   /* Word-overlap, not exact substring: the model legitimately paraphrases
      (joins two nearby sentences, drops filler) when citing, so requiring
@@ -84,8 +94,8 @@ function validate(parsed, material) {
     return w.filter(x => hayWords.has(x)).length / w.length;
   };
 
-  const grounded = parsed.groundedIn.filter(g => overlapRatio(String(g)) >= 0.5);
-  if (grounded.length < Math.ceil(parsed.groundedIn.length * 0.6)) {
+  const grounded = citations.filter(g => overlapRatio(g) >= 0.5);
+  if (grounded.length < Math.ceil(citations.length * 0.6)) {
     return 'most grounding citations do not overlap with the source material';
   }
   return null;
@@ -127,7 +137,9 @@ async function breakdown({ title, description, comments = [] }) {
     mechanism: parsed.mechanism,
     confidence: parsed.confidence === 'medium' ? 'medium' : 'low',
     beats: parsed.beats.slice(0, 6),
-    groundedIn: parsed.groundedIn
+    /* Normalised: whichever shape the model used, the client always
+       receives one flat list of what the breakdown was drawn from. */
+    groundedIn: parsed._citations || []
   };
 }
 
