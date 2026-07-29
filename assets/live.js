@@ -15,14 +15,23 @@
   const esc = (window.AdVault && window.AdVault.esc) || (s => String(s));
   const fmt = n => Number(n).toLocaleString();
 
-  /* ── 1. hydrate the library with live view counts ──────── */
+  /* ── 1. hydrate the library with live view counts ────────
+     On a static host there is no /api/library to call. The build bakes
+     a snapshot into assets/snapshot.js instead, so the counts are real
+     YouTube figures — just frozen at build time rather than polled. */
+  const STATIC = !!window.AA_STATIC;
+
   async function hydrate() {
     let payload;
-    try {
-      const res = await fetch('/api/library');
-      payload = await res.json();
-    } catch {
-      return; /* opened from the filesystem, or server down — keep estimates */
+    if (STATIC) {
+      payload = window.AA_SNAPSHOT;
+    } else {
+      try {
+        const res = await fetch('/api/library');
+        payload = await res.json();
+      } catch {
+        return; /* opened from the filesystem, or server down — keep estimates */
+      }
     }
     if (!payload || !payload.live || !payload.stats) return;
 
@@ -151,6 +160,9 @@
      tab is not hammering the server all day. */
   const POLL_MS = 60_000;
   let timer = null;
+
+  /* Nothing to poll on a static host — the snapshot never changes. */
+  if (STATIC) { hydrate(); return; }
 
   function startPolling() {
     stopPolling();
