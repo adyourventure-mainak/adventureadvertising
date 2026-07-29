@@ -55,7 +55,7 @@ let myRef = null;
 export async function join() {
   if (!db) return false;
   const uid = auth.currentUser?.uid;
-  if (!uid) return false;              /* guest fallback: read-only */
+  if (!uid) return false;              /* not signed in yet — read-only */
 
   const { code, name } = region();
   myRef = doc(db, 'presence', uid);

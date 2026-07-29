@@ -16,7 +16,7 @@ import {
   getAuth, onAuthStateChanged, signOut,
   GoogleAuthProvider, signInWithPopup,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signInAnonymously, updateProfile
+  updateProfile
 } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
 import { getAnalytics, isSupported, logEvent }
   from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js';
@@ -56,7 +56,6 @@ export function readableError(err) {
     'auth/popup-blocked': 'Your browser blocked the popup. Allow popups and try again.',
     'auth/unauthorized-domain': 'This domain is not authorised in Firebase → Authentication → Settings → Authorized domains.',
     'auth/operation-not-allowed': 'That sign-in method is switched off in Firebase → Authentication → Sign-in method.',
-    'auth/admin-restricted-operation': 'Anonymous sign-in is switched off in Firebase → Authentication → Sign-in method.',
     'auth/network-request-failed': 'No connection to Firebase. Check your network.'
   };
   return map[code] || (err && err.message) || 'Something went wrong. Try again.';
@@ -65,7 +64,6 @@ export function readableError(err) {
 export const watchUser = cb => onAuthStateChanged(auth, cb);
 export const signOutUser = () => signOut(auth);
 export const signInGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
-export const signInGuest = () => signInAnonymously(auth);
 export const signInEmail = (email, pass) => signInWithEmailAndPassword(auth, email, pass);
 
 export async function signUpEmail(email, pass, name) {

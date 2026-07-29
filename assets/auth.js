@@ -1,14 +1,13 @@
 /* ============================================================
    Sign-in gate
 
-   Holds the site behind an auth screen, but never traps anyone:
-   if Firebase is unreachable or a provider is switched off, the
-   guest path still opens the library. A study tool that will not
-   load because a popup was blocked is a broken study tool.
+   Holds the site behind an auth screen. There is no guest path:
+   every reader signs in with Google or an email address, so the
+   presence count and any per-user state always have a real uid.
    ============================================================ */
 
 import {
-  watchUser, signOutUser, signInGoogle, signInGuest,
+  watchUser, signOutUser, signInGoogle,
   signInEmail, signUpEmail, readableError, track
 } from './firebase.js';
 import { mountGlobe, loadOrigins, byCountry, compact, FALLBACK } from './globe.js';
@@ -17,7 +16,6 @@ import { join as joinPresence, leave as leavePresence, watch as watchPresence } 
 const $ = s => document.querySelector(s);
 const gate = $('#gate');
 const errorBox = $('#gateError');
-const GUEST_KEY = 'aa:guest';
 
 let mode = 'signin';            /* signin | signup */
 let globe = null;
@@ -32,21 +30,12 @@ function showApp(user) {
      saw anything. Reveal now rather than leaving blank sections. */
   window.AdVault?.revealAll?.();
 
-  joinPresence();      /* announce myself (no-op for guests without a uid) */
+  joinPresence();      /* announce myself */
   startPresence();     /* and watch everyone else, live */
 
-  const acct = $('#account');
-  const who = $('#accountWho');
-  if (user) {
-    const label = user.isAnonymous
-      ? 'Guest'
-      : (user.displayName || (user.email || '').split('@')[0] || 'Signed in');
-    who.textContent = label;
-    acct.hidden = false;
-  } else {
-    who.textContent = 'Guest';
-    acct.hidden = false;
-  }
+  $('#accountWho').textContent =
+    user.displayName || (user.email || '').split('@')[0] || 'Signed in';
+  $('#account').hidden = false;
 }
 
 function showGate() {
@@ -134,22 +123,6 @@ $('#gGoogle').addEventListener('click', async e => {
   }
 });
 
-$('#gGuest').addEventListener('click', async e => {
-  clearError();
-  busy(e.currentTarget, true, 'Opening the library…');
-  try {
-    await signInGuest();
-    track('login', { method: 'anonymous' });
-  } catch (err) {
-    /* Anonymous auth is off in the console, or Firebase is unreachable.
-       Guest access is not worth blocking on either. */
-    try { sessionStorage.setItem(GUEST_KEY, '1'); } catch {}
-    showApp(null);
-  } finally {
-    busy(e.currentTarget, false);
-  }
-});
-
 /* ── email form ───────────────────────────────────────────── */
 
 function setMode(next) {
@@ -212,7 +185,6 @@ $('#gSubmit').addEventListener('click', submit);
 /* ── sign out ─────────────────────────────────────────────── */
 
 $('#signOut').addEventListener('click', async () => {
-  try { sessionStorage.removeItem(GUEST_KEY); } catch {}
   leavePresence();
   try { await signOutUser(); } catch {}
   showGate();
@@ -225,14 +197,9 @@ document.body.classList.add('is-gated');
 let settled = false;
 watchUser(user => {
   settled = true;
-  if (user) showApp(user);
-  else {
-    let guest = false;
-    try { guest = sessionStorage.getItem(GUEST_KEY) === '1'; } catch {}
-    guest ? showApp(null) : showGate();
-  }
+  user ? showApp(user) : showGate();
 });
 
 /* If Firebase never answers — offline, blocked, misconfigured — do not
-   leave a blank page. Show the gate; the guest button still works. */
+   leave a blank page. Show the gate so the reader can retry sign-in. */
 setTimeout(() => { if (!settled) showGate(); }, 2500);

@@ -147,14 +147,14 @@ comes from Authentication settings, database rules and App Check.
 
 **Before sign-in works, in the Firebase console:**
 
-1. Authentication → Sign-in method → enable **Google**, **Email/Password**, and
-   **Anonymous** (anonymous powers the guest button).
+1. Authentication → Sign-in method → enable **Google** and **Email/Password**.
+   Anonymous is deliberately not used — there is no guest path.
 2. Authentication → Settings → Authorized domains → add every host you serve from.
    `localhost` is there by default.
 
-Nothing here traps a visitor: if Firebase is unreachable or a provider is switched off,
-the guest button still opens the library, and the gate falls back to visible if auth
-never answers within 2.5s. Firebase error codes are translated to plain English in
+Every reader signs in; there is no browse-without-an-account path. If auth never
+answers within 2.5s the gate is shown anyway rather than a blank page, so a slow or
+blocked Firebase leaves the sign-in screen usable rather than trapping the visitor. Firebase error codes are translated to plain English in
 `readableError()`.
 
 ## The globe
@@ -182,8 +182,9 @@ so a closed tab ages out within a minute even when `pagehide` never fires — wh
 often does not on mobile. Country comes from the browser's own locale, never an IP
 lookup: no third-party geolocation call and nothing to disclose. It is coarse by design.
 
-Requires **Anonymous sign-in enabled**, or presence has no uid to write with. Guests
-still see the count; they just do not appear in it.
+Every signed-in reader has a uid, so everyone on the site appears in the count. The
+count is also visible on the sign-in screen itself, where the reader has no uid yet
+and so is not counted.
 
 Lock the rules down before going public — the default test mode lets anyone write:
 
