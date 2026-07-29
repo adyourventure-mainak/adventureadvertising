@@ -120,15 +120,22 @@ async function metaSearch(req, res, url) {
 
 /* ── static ──────────────────────────────────────────────────── */
 
+/* The document root is the repo itself, so a denylist would have to grow
+   every time a file is added. Allowlist instead: the page, its assets, and
+   the handful of files a browser asks for by convention. Anything else —
+   package.json, README, scripts/, the git checkout — is not web content. */
+const PUBLIC_FILES = new Set(['/index.html', '/favicon.ico', '/robots.txt', '/sitemap.xml']);
+const servable = rel => PUBLIC_FILES.has(rel) || rel.startsWith('/assets/');
+
 function serveStatic(req, res, url) {
   let rel = decodeURIComponent(url.pathname);
   if (rel.endsWith('/')) rel += 'index.html';
   const file = path.join(ROOT, rel);
 
-  /* Keep requests inside the project, out of server/, and away from dotfiles —
-     .env lives in the project root and must never be served. */
+  /* Path traversal and dotfiles first: .env sits in the project root, and
+     `..` could otherwise climb out of it entirely. */
   const hidden = rel.split('/').some(seg => seg.startsWith('.'));
-  if (!file.startsWith(ROOT) || file.startsWith(path.join(ROOT, 'server')) || hidden) {
+  if (!file.startsWith(ROOT) || hidden || !servable(rel)) {
     res.writeHead(403).end('Forbidden');
     return;
   }
