@@ -3,3 +3,4 @@ server/.cache/
 node_modules/
 .DS_Store
 dist/
+.env.example
