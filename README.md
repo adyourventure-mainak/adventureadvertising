@@ -69,7 +69,7 @@ with the `ads_read` scope in the Graph API Explorer and extend it to 60 days wit
 | `GET /api/health` | Which providers are configured and what each one can give you |
 | `GET /api/library` | Slug-keyed live YouTube stats for every seed. `?refresh=1` bypasses the cache |
 | `GET /api/meta?term=Nike` | Meta Ad Library search. `&countries=IE,DE` `&adType=POLITICAL_AND_ISSUE_ADS` `&limit=12` |
-| `GET /api/viral` | YouTube + Meta ranked by audience gained per day. `?days=30` `?running=1` `?limit=12` |
+| `GET /api/viral` | YouTube + Meta ranked by audience gained per day. `?days=60` `?running=1` `?limit=12` |
 
 Responses are cached to `server/.cache/` (15 min for the library, 1h for Meta searches). If
 an upstream call fails and a stale copy exists, the stale copy is served rather than an
@@ -187,10 +187,10 @@ one-day flight to a handful of people otherwise produces a huge rate and crowds 
 campaigns. Rows are labelled with the **Page that ran the ad**, never the search term —
 searching "Nike" surfaces an Italian pharmacy running a BioNike promo.
 
-**Time window.** `?days=30` keeps ads that started inside the window *or* are still
+**Time window.** `?days=60` keeps ads that started inside the window *or* are still
 running — a campaign in its ninth week is live, not historic. `?running=1` keeps only
 ads still in flight. No parameter means all time. The section offers all three as chips
-and defaults to 30 days.
+and defaults to 2 months.
 
 One consequence is worth stating plainly: **every seeded YouTube campaign is years old,
 so any window leaves the board Meta-only.** That is the honest answer rather than a bug,

@@ -66,7 +66,11 @@
   function summarise(d) {
     const c = d.counts || {}, a = d.available || {};
     const w = d.window || {};
-    const scope = w.runningOnly ? 'still running' : w.days ? `started in the last ${w.days} days` : 'all time';
+    const scope = w.runningOnly ? 'still running'
+      : w.days ? (w.days % 30 === 0 && w.days >= 60
+          ? `started in the last ${w.days / 30} months`
+          : `started in the last ${w.days} days`)
+      : 'all time';
 
     let s = `${d.rows.length} campaigns ${scope}, ranked by audience gained per day`
       + ` · ${c.youtube || 0} YouTube, ${c.meta || 0} Meta`;
@@ -120,5 +124,5 @@
   }));
 
   const initial = chips.find(b => b.getAttribute('aria-pressed') === 'true');
-  load(initial ? initial.dataset.q : 'days=30');
+  load(initial ? initial.dataset.q : 'days=60');
 })();
