@@ -1,28 +1,52 @@
 'use strict';
-/* Tiny disk cache. Both upstream APIs are quota-limited, so nothing is
-   fetched twice inside its TTL. Files land in server/.cache/. */
+/* Tiny cache. Both upstream APIs are quota-limited, so nothing is fetched
+   twice inside its TTL.
+
+   Disk by default (server/.cache/, or CACHE_DIR). Some hosts give you a
+   read-only filesystem, so a failed write must never take the site down:
+   we fall back to an in-process Map, which is lost on restart but costs
+   only one extra upstream call to rebuild. */
 
 const fs = require('node:fs');
 const path = require('node:path');
 
-const DIR = path.join(__dirname, '.cache');
-if (!fs.existsSync(DIR)) fs.mkdirSync(DIR, { recursive: true });
+const DIR = process.env.CACHE_DIR || path.join(__dirname, '.cache');
 
+let onDisk = true;
+try {
+  fs.mkdirSync(DIR, { recursive: true });
+  fs.accessSync(DIR, fs.constants.W_OK);
+} catch {
+  onDisk = false;
+  console.warn(`  cache: ${DIR} is not writable — using memory instead.`);
+}
+
+const mem = new Map();
 const file = key => path.join(DIR, key.replace(/[^a-z0-9_-]/gi, '_') + '.json');
 
 function read(key, ttlMs) {
+  let raw;
   try {
-    const raw = JSON.parse(fs.readFileSync(file(key), 'utf8'));
-    const age = Date.now() - raw.savedAt;
-    if (ttlMs != null && age > ttlMs) return { value: raw.value, stale: true, savedAt: raw.savedAt };
-    return { value: raw.value, stale: false, savedAt: raw.savedAt };
+    raw = onDisk ? JSON.parse(fs.readFileSync(file(key), 'utf8')) : mem.get(key);
   } catch {
     return null;
   }
+  if (!raw) return null;
+  const stale = ttlMs != null && Date.now() - raw.savedAt > ttlMs;
+  return { value: raw.value, stale, savedAt: raw.savedAt };
 }
 
 function write(key, value) {
-  fs.writeFileSync(file(key), JSON.stringify({ savedAt: Date.now(), value }, null, 2));
+  const raw = { savedAt: Date.now(), value };
+  if (onDisk) {
+    try {
+      fs.writeFileSync(file(key), JSON.stringify(raw, null, 2));
+      return value;
+    } catch {
+      onDisk = false;   /* went read-only under us — carry on in memory */
+    }
+  }
+  mem.set(key, raw);
   return value;
 }
 
