@@ -12,6 +12,7 @@ import {
 } from './firebase.js';
 import { mountGlobe, loadOrigins, byCountry, compact, FALLBACK } from './globe.js';
 import { join as joinPresence, leave as leavePresence, watch as watchPresence } from './presence.js';
+import { record as recordUser } from './users.js';
 
 const $ = s => document.querySelector(s);
 const gate = $('#gate');
@@ -30,6 +31,7 @@ function showApp(user) {
      saw anything. Reveal now rather than leaving blank sections. */
   window.AdVault?.revealAll?.();
 
+  recordUser();        /* log the sign-in and, first time, the consent */
   joinPresence();      /* announce myself */
   startPresence();     /* and watch everyone else, live */
 

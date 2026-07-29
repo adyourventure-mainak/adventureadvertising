@@ -186,12 +186,39 @@ Every signed-in reader has a uid, so everyone on the site appears in the count. 
 count is also visible on the sign-in screen itself, where the reader has no uid yet
 and so is not counted.
 
+**Consent log — who signed in and when** (`assets/users.js`). One document per user at
+`users/{uid}`, written on every sign-in. `lastSeenAt` and `signIns` move each time;
+`consentAt` is set once, on the first sign-in, and records when that person accepted the
+notice on the gate. It is the only timestamp worth anything if you are ever asked what
+someone agreed to, so the rules below refuse any write that changes it — a client cannot
+backdate or refresh its own consent. Reads are restricted to the owner: nobody can
+enumerate your users from the browser. Read the log in the Firebase console.
+
+The gate tells readers exactly this — name, email, sign-in times. Keep that copy honest
+if you ever store more.
+
 Lock the rules down before going public — the default test mode lets anyone write:
 
 ```
-match /presence/{uid} {
-  allow read: if true;
-  allow write: if request.auth != null && request.auth.uid == uid;
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /presence/{uid} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow read:   if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null && request.auth.uid == uid
+                    && request.resource.data.uid == uid
+                    && request.resource.data.consentAt == request.time;
+      allow update: if request.auth != null && request.auth.uid == uid
+                    && request.resource.data.consentAt == resource.data.consentAt;
+      allow delete: if false;
+    }
+  }
 }
 ```
 
