@@ -529,3 +529,46 @@ h4{font-size:14px;letter-spacing:-.01em;font-weight:600}
     line-height:1.3;
   }
 }
+
+/* ── Legal pages ───────────────────────────────────────────────
+   Long-form reading, not a landing page: one narrow column, generous
+   leading, and tables that scroll rather than squeeze on a phone. */
+.legal{padding:var(--s-16) 0 var(--s-24)}
+.container--narrow{max-width:72ch;margin:0 auto;padding:0 var(--s-6)}
+
+.legal h1{font-size:clamp(32px,5vw,46px);letter-spacing:-.02em;margin:var(--s-2) 0 var(--s-4)}
+.legal h2{font-size:20px;margin:var(--s-12) 0 var(--s-3);letter-spacing:-.01em}
+.legal p,.legal li{font-size:16px;line-height:1.65;color:var(--text)}
+.legal p{margin:0 0 var(--s-4)}
+.legal a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
+.legal a:hover{color:var(--ink-hover)}
+
+.legal__meta{color:var(--text-muted);font-size:14px;margin-bottom:var(--s-8)}
+
+.legal__summary{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:var(--s-6);margin:0 0 var(--s-8);
+}
+.legal__summary h2{margin:0 0 var(--s-2);font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.legal__summary p{margin:0}
+
+.legal__list{margin:0 0 var(--s-4);padding-left:var(--s-6)}
+.legal__list li{margin-bottom:var(--s-2)}
+
+/* A table is the honest shape for "what we collect and why" — but it
+   must never make the page itself scroll sideways. */
+.legal__table{width:100%;border-collapse:collapse;margin:0 0 var(--s-6);display:block;overflow-x:auto}
+.legal__table th,.legal__table td{
+  text-align:left;padding:var(--s-3);border-bottom:1px solid var(--border);
+  font-size:15px;line-height:1.5;vertical-align:top;min-width:14ch;
+}
+.legal__table th{font-family:var(--font-display);font-weight:600;color:var(--text-muted);white-space:nowrap}
+
+.legal__contact{
+  background:var(--surface-2);border-radius:var(--r-md);
+  padding:var(--s-4);line-height:1.8;
+}
+.legal__foot{margin-top:var(--s-12);padding-top:var(--s-6);border-top:1px solid var(--border);color:var(--text-muted)}
+.footer__legal{margin-top:var(--s-2);font-size:13px;color:var(--text-faint)}
+.footer__legal a{color:var(--text-muted)}
+.gate__legal a{color:var(--text-muted);text-decoration:underline;text-underline-offset:2px}

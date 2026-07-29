@@ -18,8 +18,6 @@ import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   updateProfile
 } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
-import { getAnalytics, isSupported, logEvent }
-  from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBeXPc1QwNESOLboIwT8MBtCV9qQ11orK8',
@@ -36,9 +34,11 @@ export const auth = getAuth(app);
 
 /* Analytics throws in unsupported contexts (file://, some privacy modes),
    so it is opt-in rather than assumed. */
-let analytics = null;
-isSupported().then(ok => { if (ok) analytics = getAnalytics(app); }).catch(() => {});
-export const track = (name, params) => { try { if (analytics) logEvent(analytics, name, params); } catch {} };
+/* Deliberately a no-op. The gate promises no tracking of what you read,
+   and Google Analytics would auto-collect page views, device data and
+   coarse location the moment it loaded — so it is not loaded at all.
+   Kept as a function so call sites need no guards. */
+export const track = () => {};
 
 /* Firebase error codes are not user-facing English. */
 export function readableError(err) {

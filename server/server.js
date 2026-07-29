@@ -15,6 +15,7 @@ const cache = require('./cache');
 const youtube = require('./youtube');
 const meta = require('./meta');
 const viral = require('./viral');
+const discover = require('./discover');
 
 const PORT = Number(process.env.PORT) || 8123;
 const SEEDS = JSON.parse(fs.readFileSync(path.join(__dirname, 'seeds.json'), 'utf8')).ads;
@@ -24,7 +25,8 @@ const TTL = {
      still ~96 upstream calls a day against a 10,000-unit quota. */
   library: Number(process.env.LIBRARY_TTL_MINUTES || 15) * 60_000,
   meta: Number(process.env.META_TTL_MINUTES || 60) * 60_000,
-  viral: Number(process.env.VIRAL_TTL_MINUTES || 60) * 60_000
+  viral: Number(process.env.VIRAL_TTL_MINUTES || 60) * 60_000,
+  discover: Number(process.env.DISCOVER_TTL_MINUTES || 720) * 60_000
 };
 
 const MIME = {
@@ -142,13 +144,36 @@ async function viralBoard(req, res, url) {
   }
 }
 
+/* Auto-discovery. 100 quota units per query, so this is cached for
+   half a day and never refreshed on demand. */
+async function discovered(req, res, url) {
+  if (!discover.configured()) {
+    return json(res, 200, { ok: false, reason: 'YOUTUBE_API_KEY is not set.', ads: [] });
+  }
+  const limit = Math.min(Number(url.searchParams.get('limit')) || 24, 60);
+  try {
+    const r = await cache.through('discover', TTL.discover, () => discover.sweep());
+    json(res, 200, {
+      ok: true,
+      cached: r.cached,
+      fetchedAt: new Date(r.savedAt).toISOString(),
+      total: r.data.ads.length,
+      queries: r.data.queries,
+      filters: r.data.filters,
+      ads: r.data.ads.slice(0, limit)
+    });
+  } catch (err) {
+    json(res, 502, { ok: false, reason: err.message, ads: [] });
+  }
+}
+
 /* ── static ──────────────────────────────────────────────────── */
 
 /* The document root is the repo itself, so a denylist would have to grow
    every time a file is added. Allowlist instead: the page, its assets, and
    the handful of files a browser asks for by convention. Anything else —
    package.json, README, scripts/, the git checkout — is not web content. */
-const PUBLIC_FILES = new Set(['/index.html', '/favicon.ico', '/robots.txt', '/sitemap.xml']);
+const PUBLIC_FILES = new Set(['/index.html', '/privacy.html', '/terms.html', '/favicon.ico', '/robots.txt', '/sitemap.xml']);
 const servable = rel => PUBLIC_FILES.has(rel) || rel.startsWith('/assets/');
 
 function serveStatic(req, res, url) {
@@ -179,6 +204,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/library') return await library(req, res, url);
     if (url.pathname === '/api/meta') return await metaSearch(req, res, url);
     if (url.pathname === '/api/viral') return await viralBoard(req, res, url);
+    if (url.pathname === '/api/discover') return await discovered(req, res, url);
     if (url.pathname.startsWith('/api/')) return json(res, 404, { error: 'No such route' });
     return serveStatic(req, res, url);
   } catch (err) {
