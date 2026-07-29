@@ -19,7 +19,9 @@ const PORT = Number(process.env.PORT) || 8123;
 const SEEDS = JSON.parse(fs.readFileSync(path.join(__dirname, 'seeds.json'), 'utf8')).ads;
 
 const TTL = {
-  library: Number(process.env.LIBRARY_TTL_MINUTES || 360) * 60_000,
+  /* Short enough that the front end's polling actually sees movement;
+     still ~96 upstream calls a day against a 10,000-unit quota. */
+  library: Number(process.env.LIBRARY_TTL_MINUTES || 15) * 60_000,
   meta: Number(process.env.META_TTL_MINUTES || 60) * 60_000
 };
 

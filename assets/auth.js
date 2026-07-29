@@ -12,6 +12,7 @@ import {
   signInEmail, signUpEmail, readableError, track
 } from './firebase.js';
 import { mountGlobe, loadOrigins, byCountry, compact, FALLBACK } from './globe.js';
+import { join as joinPresence, leave as leavePresence, watch as watchPresence } from './presence.js';
 
 const $ = s => document.querySelector(s);
 const gate = $('#gate');
@@ -30,6 +31,9 @@ function showApp(user) {
   /* The page was display:none while gated, so the scroll observer never
      saw anything. Reveal now rather than leaving blank sections. */
   window.AdVault?.revealAll?.();
+
+  joinPresence();      /* announce myself (no-op for guests without a uid) */
+  startPresence();     /* and watch everyone else, live */
 
   const acct = $('#account');
   const who = $('#accountWho');
@@ -50,6 +54,7 @@ function showGate() {
   gate.hidden = false;
   $('#account').hidden = true;
   if (!globe) startGlobe();
+  startPresence();     /* the count is visible on the gate too */
   requestAnimationFrame(() => $('#gGoogle')?.focus());
 }
 
@@ -81,6 +86,37 @@ async function startGlobe() {
   const rows = await loadOrigins();            /* then swap in live counts */
   paintLegend(rows);
   globe = await mountGlobe($('#globeCanvas'), { rows });
+}
+
+/* ── live presence ────────────────────────────────────────
+   One subscription for the whole session; it renders into the
+   gate panel and the nav chip, whichever is on screen. */
+let unwatch = null;
+
+function paintPresence(state) {
+  const gateBox = $('#liveNow'), navBox = $('#navLive');
+
+  /* null = Firestore is off or the rules reject reads. Say nothing
+     rather than showing a fake zero. */
+  if (!state || !state.total) {
+    gateBox.hidden = true;
+    navBox.hidden = true;
+    return;
+  }
+
+  $('#liveCount').textContent = state.total;
+  $('#liveWord').textContent = state.total === 1 ? 'person reading now' : 'reading now';
+  $('#liveWhere').textContent = state.countries.length
+    ? state.countries.slice(0, 3).map(c => `${c.country} ${c.count}`).join(' · ')
+    : '';
+  $('#navLiveCount').textContent = state.total;
+  gateBox.hidden = false;
+  navBox.hidden = false;
+}
+
+function startPresence() {
+  if (unwatch) return;
+  unwatch = watchPresence(paintPresence);
 }
 
 /* ── providers ────────────────────────────────────────────── */
@@ -177,6 +213,7 @@ $('#gSubmit').addEventListener('click', submit);
 
 $('#signOut').addEventListener('click', async () => {
   try { sessionStorage.removeItem(GUEST_KEY); } catch {}
+  leavePresence();
   try { await signOutUser(); } catch {}
   showGate();
 });

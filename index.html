@@ -71,7 +71,12 @@
         <canvas id="globeCanvas"></canvas>
       </div>
       <div class="globe__meta">
-        <p class="globe__label"><i class="dot" aria-hidden="true"></i>Views by country of origin</p>
+        <p class="live-now" id="liveNow" hidden>
+          <i class="dot" aria-hidden="true"></i>
+          <b id="liveCount">0</b> <span id="liveWord">reading now</span>
+          <em id="liveWhere"></em>
+        </p>
+        <p class="globe__label">Views by country of origin</p>
         <ul class="globe__legend" id="globeLegend"></ul>
         <p class="globe__foot">Live YouTube counts, grouped by where each campaign was made. Marker size scales with views.</p>
       </div>
@@ -94,6 +99,7 @@
       <a href="#ethics">Ground rules</a>
       <a class="btn btn--sm btn--primary" href="#builder">Build my brief</a>
       <div class="account" id="account" hidden>
+        <span class="account__live" id="navLive" hidden><i class="dot" aria-hidden="true"></i><b id="navLiveCount">0</b></span>
         <span class="account__who" id="accountWho"></span>
         <button class="btn btn--sm btn--quiet" type="button" id="signOut">Sign out</button>
       </div>

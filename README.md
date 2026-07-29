@@ -70,7 +70,7 @@ with the `ads_read` scope in the Graph API Explorer and extend it to 60 days wit
 | `GET /api/library` | Slug-keyed live YouTube stats for every seed. `?refresh=1` bypasses the cache |
 | `GET /api/meta?term=Nike` | Meta Ad Library search. `&countries=IE,DE` `&adType=POLITICAL_AND_ISSUE_ADS` `&limit=12` |
 
-Responses are cached to `server/.cache/` (6h for the library, 1h for Meta searches). If
+Responses are cached to `server/.cache/` (15 min for the library, 1h for Meta searches). If
 an upstream call fails and a stale copy exists, the stale copy is served rather than an
 error — a rate limit should never blank the page.
 
@@ -169,3 +169,35 @@ It is the same component as the supplied React version with two deliberate chang
 
 If the CDN is unreachable the canvas gets `.globe--failed` and a dashed placeholder; the
 sign-in panel is unaffected.
+
+## Realtime
+
+Two independent live channels. Neither needs a page refresh.
+
+**Presence — who is actually on the site** (`assets/presence.js`). Firestore, chosen over
+the Realtime Database because the config has no `databaseURL` and Firestore needs only
+`projectId`. Firestore has no `onDisconnect()`, so presence is a heartbeat: each client
+refreshes its own `presence/{uid}` doc every 20s and readers ignore rows older than 60s,
+so a closed tab ages out within a minute even when `pagehide` never fires — which it
+often does not on mobile. Country comes from the browser's own locale, never an IP
+lookup: no third-party geolocation call and nothing to disclose. It is coarse by design.
+
+Requires **Anonymous sign-in enabled**, or presence has no uid to write with. Guests
+still see the count; they just do not appear in it.
+
+Lock the rules down before going public — the default test mode lets anyone write:
+
+```
+match /presence/{uid} {
+  allow read: if true;
+  allow write: if request.auth != null && request.auth.uid == uid;
+}
+```
+
+**View counts** (`assets/live.js`). Polls `/api/library` every 60s and updates counts,
+the combined total and card order in place. Polling stops while the tab is hidden and
+catches up on return, so a forgotten tab does not hammer the server. Server cache is
+15 minutes — roughly 96 upstream calls a day against a 10,000-unit quota.
+
+Presence works on static hosting (it is pure Firebase). The count polling does not —
+that needs the Node server, so a static upload keeps the baked numbers.

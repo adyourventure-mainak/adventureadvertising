@@ -77,7 +77,28 @@ Firebase console → **Authentication → Sign-in method** → enable:
 - **Anonymous** — the "Browse without an account" button
 
 Until these are on, the guest button still works (it falls back to a local session),
-but Google and email sign-in will error.
+but Google and email sign-in will error. **Anonymous** also powers the live "reading
+now" counter — without it, visitors see the count but never appear in it.
+
+### 6. Lock down Firestore rules
+
+The presence feature reads and writes a `presence` collection. Test-mode rules let
+anyone write anything, so before the site is public set:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /presence/{uid} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
+```
+
+Anyone may see the count; only a signed-in user may write their own row.
 
 ---
 

@@ -145,5 +145,23 @@
     $('#mTerm').addEventListener('keydown', e => { if (e.key === 'Enter') searchMeta(); });
   }
 
-  hydrate();
+  /* ── 3. keep the counts moving ───────────────────────────
+     Without this the numbers are only as fresh as the page load. Poll
+     while the tab is visible; stop while it is hidden so a forgotten
+     tab is not hammering the server all day. */
+  const POLL_MS = 60_000;
+  let timer = null;
+
+  function startPolling() {
+    stopPolling();
+    timer = setInterval(() => { if (!document.hidden) hydrate(); }, POLL_MS);
+  }
+  const stopPolling = () => { clearInterval(timer); timer = null; };
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopPolling();
+    else { hydrate(); startPolling(); }   /* catch up immediately on return */
+  });
+
+  hydrate().then(startPolling);
 })();
