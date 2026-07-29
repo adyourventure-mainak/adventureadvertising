@@ -16,6 +16,7 @@ const youtube = require('./youtube');
 const meta = require('./meta');
 const viral = require('./viral');
 const discover = require('./discover');
+const recipe = require('./recipe');
 
 const PORT = Number(process.env.PORT) || 8123;
 const SEEDS = JSON.parse(fs.readFileSync(path.join(__dirname, 'seeds.json'), 'utf8')).ads;
@@ -26,7 +27,8 @@ const TTL = {
   library: Number(process.env.LIBRARY_TTL_MINUTES || 15) * 60_000,
   meta: Number(process.env.META_TTL_MINUTES || 60) * 60_000,
   viral: Number(process.env.VIRAL_TTL_MINUTES || 60) * 60_000,
-  discover: Number(process.env.DISCOVER_TTL_MINUTES || 720) * 60_000
+  discover: Number(process.env.DISCOVER_TTL_MINUTES || 720) * 60_000,
+  recipe: Number(process.env.RECIPE_TTL_MINUTES || 43200) * 60_000  /* 30 days — metadata does not change */
 };
 
 const MIME = {
@@ -167,6 +169,39 @@ async function discovered(req, res, url) {
   }
 }
 
+/* AI breakdown, metadata-only. Cached essentially forever since the
+   inputs (title/description/comments) rarely change once an ad has
+   been up a while, and re-running costs a real OpenAI call. */
+async function recipeFor(req, res, url) {
+  if (!recipe.configured()) {
+    return json(res, 200, { ok: false, reason: 'OPENAI_API_KEY is not set.' });
+  }
+  const videoId = (url.searchParams.get('videoId') || '').trim();
+  if (!/^[\w-]{11}$/.test(videoId)) {
+    return json(res, 400, { ok: false, reason: 'Pass ?videoId=<11-character YouTube id>' });
+  }
+  if (!youtube.configured()) {
+    return json(res, 200, { ok: false, reason: 'YOUTUBE_API_KEY is not set — needed to fetch the title/description.' });
+  }
+
+  try {
+    const r = await cache.through(`recipe_${videoId}`, TTL.recipe, async () => {
+      const meta = await youtube.videoMeta(videoId);
+      if (!meta) throw new Error('Video not found or not public.');
+      /* Only a successful, validated breakdown is worth 30 days on disk.
+         A rejection — thin material, a bad OpenAI response — must throw
+         rather than resolve, or cache.through would write the failure to
+         disk and every reader would be stuck with it for a month. */
+      const out = await recipe.breakdown(meta);
+      if (!out.ok) throw new Error(out.reason);
+      return out;
+    });
+    json(res, 200, { cached: r.cached, ...r.data });
+  } catch (err) {
+    json(res, 200, { ok: false, reason: err.message });
+  }
+}
+
 /* ── static ──────────────────────────────────────────────────── */
 
 /* The document root is the repo itself, so a denylist would have to grow
@@ -205,6 +240,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/meta') return await metaSearch(req, res, url);
     if (url.pathname === '/api/viral') return await viralBoard(req, res, url);
     if (url.pathname === '/api/discover') return await discovered(req, res, url);
+    if (url.pathname === '/api/recipe') return await recipeFor(req, res, url);
     if (url.pathname.startsWith('/api/')) return json(res, 404, { error: 'No such route' });
     return serveStatic(req, res, url);
   } catch (err) {

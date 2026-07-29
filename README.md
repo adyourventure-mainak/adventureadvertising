@@ -203,6 +203,33 @@ body replaced by a notice. They reached people, but there is nothing to study.
 Cached 60 minutes (`VIRAL_TTL_MINUTES`) per window; it costs one Meta call per search
 term, so the first uncached load of a window takes a few seconds.
 
+## AI breakdowns (`/api/recipe`)
+
+Metadata-grounded, not transcript-grounded. YouTube's caption endpoint now
+requires a session-bound token a server-side request cannot obtain without
+actively defeating their bot detection — the same category of thing this
+project refuses to do to the Ads Transparency Center, so it is not done
+here either. Real captions were tested (`server/discover.js`'s neighbour
+attempts are gone; see git history) and confirmed blocked as of July 2026:
+HTTP 200, zero-length body, server header `video-timedtext` — a deliberate
+empty response, not a bug.
+
+So `server/recipe.js` works from what the Data API gives for free: title,
+description, and top comments. GPT (`RECIPE_MODEL`, default `gpt-5.4-nano`)
+is instructed to never invent a shot, line or timestamp, and to cite the
+material it drew from. The server then validates that citation itself —
+word-overlap against the actual title/description/comments — and rejects
+output that doesn't check out, rather than trusting the model's word for it.
+A rejection throws rather than resolving, so cache.through never persists a
+failure for the full 30-day TTL.
+
+Every card is labelled "AI read the description and comments" with an
+explicit disclosure sentence, visually distinct (dashed border) from the
+hand-written breakdowns. If the material is too thin or the model can't
+ground its claims, the block hides itself rather than showing a stub.
+
+Requires `OPENAI_API_KEY`. Cached 30 days per video (`RECIPE_TTL_MINUTES`).
+
 ## The globe
 
 `assets/globe.js` — cobe, loaded from `esm.sh` at runtime, no build step and no React.

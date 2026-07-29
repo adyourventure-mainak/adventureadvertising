@@ -133,4 +133,30 @@ async function library(seeds) {
   return out;
 }
 
-module.exports = { library, resolveIds, compact, configured: () => !!KEY() };
+/* Title, description and top comments for one video — the metadata
+   the recipe engine is allowed to reason from. commentThreads is a
+   separate quota-cheap call (1 unit) and is best-effort: comments can
+   be disabled, which must not fail the whole lookup. */
+async function videoMeta(videoId) {
+  const r = await call('/videos', { part: 'snippet', id: videoId });
+  const it = (r.items || [])[0];
+  if (!it) return null;
+
+  let comments = [];
+  try {
+    const c = await call('/commentThreads', {
+      videoId, part: 'snippet', order: 'relevance', maxResults: '10', textFormat: 'plainText'
+    });
+    comments = (c.items || []).map(t => t.snippet.topLevelComment.snippet.textDisplay);
+  } catch { /* comments off, or region-restricted — proceed without them */ }
+
+  return {
+    videoId,
+    title: it.snippet.title,
+    description: it.snippet.description || '',
+    channel: it.snippet.channelTitle,
+    comments
+  };
+}
+
+module.exports = { library, resolveIds, videoMeta, compact, configured: () => !!KEY() };

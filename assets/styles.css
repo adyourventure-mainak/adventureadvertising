@@ -572,3 +572,20 @@ h4{font-size:14px;letter-spacing:-.01em;font-weight:600}
 .footer__legal{margin-top:var(--s-2);font-size:13px;color:var(--text-faint)}
 .footer__legal a{color:var(--text-muted)}
 .gate__legal a{color:var(--text-muted);text-decoration:underline;text-underline-offset:2px}
+
+/* ── AI breakdown block ───────────────────────────────────────
+   Deliberately not styled like the hand-written "How it is built"
+   block above it — a dashed border and a muted disclosure line keep
+   it visually distinct, because it is a different kind of claim. */
+#aiBlock{
+  border:1px dashed var(--border-strong);border-radius:var(--r-md);
+  padding:var(--s-5) var(--s-6);background:var(--surface);
+}
+#aiBlock h3{display:flex;align-items:center;gap:var(--s-2);font-size:15px;color:var(--text-muted)}
+#aiBlock h3::before{content:"✦";color:var(--text-faint);font-size:13px}
+.ai-status{color:var(--text-faint);font-size:14px}
+.ai-disclosure{font-size:13px;color:var(--text-faint);font-style:italic;margin:var(--s-2) 0 var(--s-4);max-width:60ch}
+.ai-mechanism{font-size:14.5px;margin-bottom:var(--s-3)}
+.ai-beats{margin:0 0 var(--s-3);padding-left:var(--s-5);display:grid;gap:var(--s-2)}
+.ai-beats li{font-size:14.5px;line-height:1.55}
+.ai-confidence{font-size:12px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.04em}
