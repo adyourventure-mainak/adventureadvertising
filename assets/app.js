@@ -153,11 +153,15 @@
   chips($('#filterBudget'), present(BUDGETS, 'budget'), 'budget');
   renderGrid();
 
+  /* Only the library's own chips. Other sections use .chip too, and a
+     document-wide selector was setting every one of them pressed. */
+  const ownChips = () => $$('#filterFormat .chip, #filterBudget .chip');
+
   document.addEventListener('click', e => {
-    const chip = e.target.closest('.chip');
+    const chip = e.target.closest('#filterFormat .chip, #filterBudget .chip');
     if (chip) {
       state[chip.dataset.key] = chip.dataset.val;
-      $$('.chip').forEach(c => c.setAttribute('aria-pressed', String(state[c.dataset.key] === c.dataset.val)));
+      ownChips().forEach(c => c.setAttribute('aria-pressed', String(state[c.dataset.key] === c.dataset.val)));
       renderGrid();
       return;
     }
@@ -168,7 +172,7 @@
   /* footer quick-jumps into the filtered library */
   $$('[data-jump]').forEach(a => a.addEventListener('click', () => {
     state.format = a.dataset.jump; state.budget = 'any';
-    $$('.chip').forEach(c => c.setAttribute('aria-pressed', String(state[c.dataset.key] === c.dataset.val)));
+    ownChips().forEach(c => c.setAttribute('aria-pressed', String(state[c.dataset.key] === c.dataset.val)));
     renderGrid();
   }));
 

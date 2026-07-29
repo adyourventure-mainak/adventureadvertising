@@ -14,6 +14,7 @@ try { process.loadEnvFile(path.join(ROOT, '.env')); } catch { /* no .env — rou
 const cache = require('./cache');
 const youtube = require('./youtube');
 const meta = require('./meta');
+const viral = require('./viral');
 
 const PORT = Number(process.env.PORT) || 8123;
 const SEEDS = JSON.parse(fs.readFileSync(path.join(__dirname, 'seeds.json'), 'utf8')).ads;
@@ -22,7 +23,8 @@ const TTL = {
   /* Short enough that the front end's polling actually sees movement;
      still ~96 upstream calls a day against a 10,000-unit quota. */
   library: Number(process.env.LIBRARY_TTL_MINUTES || 15) * 60_000,
-  meta: Number(process.env.META_TTL_MINUTES || 60) * 60_000
+  meta: Number(process.env.META_TTL_MINUTES || 60) * 60_000,
+  viral: Number(process.env.VIRAL_TTL_MINUTES || 60) * 60_000
 };
 
 const MIME = {
@@ -118,6 +120,28 @@ async function metaSearch(req, res, url) {
   }
 }
 
+/* Viral = rate, not total. Costs one Meta call per term, so it is
+   cached harder than the library and never refreshed on demand. */
+async function viralBoard(req, res, url) {
+  const limit = Math.min(Number(url.searchParams.get('limit')) || 12, 40);
+  const windowDays = Math.min(Math.max(Number(url.searchParams.get('days')) || 0, 0), 3650);
+  const runningOnly = url.searchParams.get('running') === '1';
+  const key = `viral_${limit}_${windowDays}_${runningOnly ? 1 : 0}`;
+  try {
+    const lib = await cache.through('library', TTL.library, () => youtube.library(SEEDS));
+    const r = await cache.through(key, TTL.viral, () =>
+      viral.board(lib.data, limit, { windowDays, runningOnly }));
+    json(res, 200, {
+      ok: true,
+      cached: r.cached,
+      fetchedAt: new Date(r.savedAt).toISOString(),
+      ...r.data
+    });
+  } catch (err) {
+    json(res, 502, { ok: false, reason: err.message, rows: [] });
+  }
+}
+
 /* ── static ──────────────────────────────────────────────────── */
 
 /* The document root is the repo itself, so a denylist would have to grow
@@ -154,6 +178,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/health') return await health(req, res);
     if (url.pathname === '/api/library') return await library(req, res, url);
     if (url.pathname === '/api/meta') return await metaSearch(req, res, url);
+    if (url.pathname === '/api/viral') return await viralBoard(req, res, url);
     if (url.pathname.startsWith('/api/')) return json(res, 404, { error: 'No such route' });
     return serveStatic(req, res, url);
   } catch (err) {

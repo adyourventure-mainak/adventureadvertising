@@ -188,6 +188,31 @@
     </div>
   </section>
 
+  <!-- ─────────────────────────── VIRAL ─────────────────────────── -->
+  <section id="viral" class="section section--alt">
+    <div class="container">
+      <header class="section__head">
+        <div>
+          <p class="eyebrow">Reach per day</p>
+          <h2>Spreading fastest</h2>
+        </div>
+        <p class="section__note">Viral is a rate, not a total. Everything here is ranked by audience gained per day, so a nine-day campaign can outrank a film with a hundred times the lifetime views.</p>
+      </header>
+
+      <div class="filters" role="group" aria-label="Time window">
+        <div class="filters__row" id="viralWindow">
+          <button class="chip" type="button" data-q="days=30" aria-pressed="true">Last 30 days</button>
+          <button class="chip" type="button" data-q="running=1" aria-pressed="false">Running now</button>
+          <button class="chip" type="button" data-q="" aria-pressed="false">All time</button>
+        </div>
+      </div>
+
+      <p class="results" id="viralStatus" role="status" aria-live="polite">Loading the board…</p>
+      <ol class="viral" id="viralList"></ol>
+      <p class="hint hint--foot" id="viralBasis" hidden></p>
+    </div>
+  </section>
+
   <!-- ─────────────────────────── LIVE / META ─────────────────────────── -->
   <section id="live" class="section section--alt">
     <div class="container">
@@ -354,6 +379,7 @@
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/live.js"></script>
+<script src="assets/viral.js"></script>
 <script type="module" src="assets/auth.js"></script>
 </body>
 </html>

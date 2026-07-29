@@ -69,6 +69,7 @@ with the `ads_read` scope in the Graph API Explorer and extend it to 60 days wit
 | `GET /api/health` | Which providers are configured and what each one can give you |
 | `GET /api/library` | Slug-keyed live YouTube stats for every seed. `?refresh=1` bypasses the cache |
 | `GET /api/meta?term=Nike` | Meta Ad Library search. `&countries=IE,DE` `&adType=POLITICAL_AND_ISSUE_ADS` `&limit=12` |
+| `GET /api/viral` | YouTube + Meta ranked by audience gained per day. `?days=30` `?running=1` `?limit=12` |
 
 Responses are cached to `server/.cache/` (15 min for the library, 1h for Meta searches). If
 an upstream call fails and a stale copy exists, the stale copy is served rather than an
@@ -156,6 +157,51 @@ Every reader signs in; there is no browse-without-an-account path. If auth never
 answers within 2.5s the gate is shown anyway rather than a blank page, so a slow or
 blocked Firebase leaves the sign-in screen usable rather than trapping the visitor. Firebase error codes are translated to plain English in
 `readableError()`.
+
+## Spreading fastest (`/api/viral`)
+
+Ranks YouTube campaigns and live Meta creatives together on one number: **audience
+gained per day**. Viral is a rate. A nine-day campaign can and does outrank a film with
+a hundred times the lifetime views.
+
+The two halves are not the same measurement, and the section says so in as many words:
+
+| | basis | coverage |
+|---|---|---|
+| YouTube | views ÷ days since publish | worldwide, but a **lifetime average** — a film that exploded in week one reads lower than it truly was |
+| Meta | EU reach ÷ days in flight | people, not plays, and **EU accounts only** |
+
+**On non-EU coverage.** The country list spans 20 markets including India, the US and
+Brazil (`VIRAL_COUNTRIES`), and it does widen the pool — but only to campaigns that
+*also* run in the EU. A commercial ad enters Meta's public archive because it ran in the
+EU/UK, and `euReach` is the only reach figure Meta publishes anywhere. India-only
+commercial campaigns are not in the archive at any country setting. India *is* covered
+for political and issue ads, with real impressions and INR spend ranges — deliberately
+not included here, since election ads are not the craft this site teaches. YouTube
+carries the genuinely worldwide half.
+
+Two cleanups keep the board honest: creatives are deduped by page + headline, because
+advertisers run one headline under many ad IDs (one Zalando line came back three times
+with three different rates), and anything under 1,000 EU reach is dropped, because a
+one-day flight to a handful of people otherwise produces a huge rate and crowds out real
+campaigns. Rows are labelled with the **Page that ran the ad**, never the search term —
+searching "Nike" surfaces an Italian pharmacy running a BioNike promo.
+
+**Time window.** `?days=30` keeps ads that started inside the window *or* are still
+running — a campaign in its ninth week is live, not historic. `?running=1` keeps only
+ads still in flight. No parameter means all time. The section offers all three as chips
+and defaults to 30 days.
+
+One consequence is worth stating plainly: **every seeded YouTube campaign is years old,
+so any window leaves the board Meta-only.** That is the honest answer rather than a bug,
+and the status line says so — "the 7 YouTube campaigns are historic, so they appear
+under All time" — instead of quietly showing half of what the heading promises.
+
+Takedown placeholders are dropped: Meta keeps removed creatives in the archive with the
+body replaced by a notice. They reached people, but there is nothing to study.
+
+Cached 60 minutes (`VIRAL_TTL_MINUTES`) per window; it costs one Meta call per search
+term, so the first uncached load of a window takes a few seconds.
 
 ## The globe
 
