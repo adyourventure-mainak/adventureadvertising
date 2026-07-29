@@ -26,6 +26,8 @@ const ADS = [
   {
     id: 'purple-egg',
     verified: true,
+    videoId: '4BvwpjaGZCQ',
+    thumb: 'https://i.ytimg.com/vi/4BvwpjaGZCQ/maxresdefault.jpg',
     brand: 'Purple',
     title: 'The Raw Egg Test',
     year: 2016,
@@ -60,6 +62,8 @@ const ADS = [
   {
     id: 'dumb-ways',
     verified: true,
+    videoId: 'IJNR2EpS0jw',
+    thumb: 'https://i.ytimg.com/vi/IJNR2EpS0jw/sddefault.jpg',
     brand: 'Metro Trains Melbourne',
     title: 'Dumb Ways to Die',
     year: 2012,
@@ -125,6 +129,8 @@ const ADS = [
   {
     id: 'volvo-split',
     verified: true,
+    videoId: 'M7FIvfx5J10',
+    thumb: 'https://i.ytimg.com/vi/M7FIvfx5J10/maxresdefault.jpg',
     brand: 'Volvo Trucks',
     title: 'The Epic Split',
     year: 2013,
@@ -224,6 +230,8 @@ const ADS = [
   {
     id: 'old-spice',
     verified: true,
+    videoId: 'owGykVbfgUE',
+    thumb: 'https://i.ytimg.com/vi/owGykVbfgUE/maxresdefault.jpg',
     brand: 'Old Spice',
     title: 'The Man Your Man Could Smell Like',
     year: 2010,
@@ -257,6 +265,8 @@ const ADS = [
   {
     id: 'squatty-potty',
     verified: true,
+    videoId: 'YbYWhdLO43Q',
+    thumb: 'https://i.ytimg.com/vi/YbYWhdLO43Q/maxresdefault.jpg',
     brand: 'Squatty Potty',
     title: 'This Unicorn Changed the Way I Poop',
     year: 2015,
@@ -388,6 +398,8 @@ const ADS = [
   {
     id: 'dollar-shave',
     verified: true,
+    videoId: 'ZUG9qYTJMsI',
+    thumb: 'https://i.ytimg.com/vi/ZUG9qYTJMsI/maxresdefault.jpg',
     brand: 'Dollar Shave Club',
     title: 'Our Blades Are F***ing Great',
     year: 2012,
@@ -454,6 +466,8 @@ const ADS = [
   {
     id: 'blendtec',
     verified: true,
+    videoId: 'qg1ckCkm8YI',
+    thumb: 'https://i.ytimg.com/vi/qg1ckCkm8YI/hqdefault.jpg',
     brand: 'Blendtec',
     title: 'Will It Blend? — iPhone',
     year: 2007,
