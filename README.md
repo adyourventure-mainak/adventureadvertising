@@ -70,6 +70,8 @@ with the `ads_read` scope in the Graph API Explorer and extend it to 60 days wit
 | `GET /api/library` | Slug-keyed live YouTube stats for every seed. `?refresh=1` bypasses the cache |
 | `GET /api/meta?term=Nike` | Meta Ad Library search. `&countries=IE,DE` `&adType=POLITICAL_AND_ISSUE_ADS` `&limit=12` |
 | `GET /api/watched?platform=youtube` | Most-watched per platform. `youtube` = real view counts; `facebook`/`instagram` = ads by EU reach, no organic data exists |
+| `GET /api/watch?brand=Zomato` | Competitor diff — what launched/stopped since the last baseline |
+| `GET /api/festivals?region=WB` | Regional campaign calendar with lock-by dates |
 | `GET /api/viral` | YouTube + Meta ranked by audience gained per day. `?days=60` `?running=1` `?limit=12` |
 
 Responses are cached to `server/.cache/` (15 min for the library, 1h for Meta searches). If
@@ -203,6 +205,58 @@ body replaced by a notice. They reached people, but there is nothing to study.
 
 Cached 60 minutes (`VIRAL_TTL_MINUTES`) per window; it costs one Meta call per search
 term, so the first uncached load of a window takes a few seconds.
+
+## Competitor watch (`/api/watch`)
+
+Search is a one-off; monitoring is a reason to come back. The unit of value is the
+**diff**, not the list — what launched, what stopped, and how long it ran.
+
+Two sources, two honest scopes. **Meta** creatives are filtered to ads run by a page
+whose *name* matches the brand: Meta's `search_terms` matches ad copy rather than
+advertiser, so searching "Tata" returns a drama app, and an unfiltered report would
+attribute ads to a competitor who never ran them. **YouTube** monitors the brand's own
+channel, resolved once (100 quota units) then cached forever; refreshes cost ~2 units
+via the uploads playlist instead of 100 via search.
+
+**Channel resolution is a heuristic, and the UI admits it.** Searching "Amul" returns a
+private individual's channel titled exactly "Amul" ahead of the dairy brand's "Amul TV",
+so candidates are ranked by subscriber count. That fixes Amul but still lands "Dabur" on
+Dabur Amla Arabia rather than Dabur India — so the page names the channel being watched,
+letting the reader catch a mismatch instead of trusting it silently.
+
+The **baseline rotates once every 24h**, not per request. Rotating per call would tell
+two users an hour apart that nothing changed — true, and useless.
+
+Watchlists are per-user in Firestore (`watchlists/{uid}`, capped at 25 brands) with a
+localStorage fallback, so a database hiccup does not lose a list of six brand names.
+Snapshots are shared server-side: two agencies watching Zomato hit one cached snapshot.
+
+Rules to add:
+
+```
+match /watchlists/{uid} {
+  allow read, write: if request.auth != null && request.auth.uid == uid;
+}
+```
+
+## Festival planner (`/api/festivals`)
+
+Dates are handled deliberately, because a wrong Diwali date costs someone a campaign.
+
+**Solar** festivals (Pongal, Baisakhi, Poila Boishakh, Lohri, Vishu, Bihu) fall on the
+same Gregorian date yearly and are marked exact. **Lunar** ones (Diwali, Durga Puja,
+Holi, Ganesh Chaturthi) move by weeks, and Islamic dates shift ~11 days earlier each
+year — those are shown as month windows, aimed at the window's midpoint, and flagged as
+approximate. Targeting the window's *start* put Durga Puja five weeks early, which any
+Bengali planner would catch instantly, and a calendar you can catch out once is a
+calendar nobody trusts again.
+
+The bold number is the **lock-by date**, not the festival date: when creative has to be
+signed off is the decision a planner actually makes. Bengal's Durga Puja carries a
+10-week lead because pandal and hoarding inventory is committed by July.
+
+Region defaults from the browser locale (country only, never an IP lookup) and is
+remembered locally; Indian readers pick their state, since a locale cannot give one.
 
 ## Most watched, per platform (`/api/watched`)
 

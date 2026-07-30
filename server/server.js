@@ -18,6 +18,8 @@ const viral = require('./viral');
 const discover = require('./discover');
 const recipe = require('./recipe');
 const watched = require('./watched');
+const watchlist = require('./watchlist');
+const festivals = require('./festivals');
 
 const PORT = Number(process.env.PORT) || 8123;
 const SEEDS = JSON.parse(fs.readFileSync(path.join(__dirname, 'seeds.json'), 'utf8')).ads;
@@ -30,7 +32,8 @@ const TTL = {
   viral: Number(process.env.VIRAL_TTL_MINUTES || 60) * 60_000,
   discover: Number(process.env.DISCOVER_TTL_MINUTES || 720) * 60_000,
   recipe: Number(process.env.RECIPE_TTL_MINUTES || 43200) * 60_000,   /* 30 days — metadata does not change */
-  watched: Number(process.env.WATCHED_TTL_MINUTES || 60) * 60_000
+  watched: Number(process.env.WATCHED_TTL_MINUTES || 60) * 60_000,
+  watch: Number(process.env.WATCH_TTL_MINUTES || 30) * 60_000
 };
 
 const MIME = {
@@ -189,6 +192,46 @@ async function watchedBoard(req, res, url) {
   }
 }
 
+/* Competitor monitoring. The diff is the product, so this is cached
+   only briefly — long enough to stop a page refresh spending quota,
+   short enough that a check after lunch sees the morning's launches. */
+async function watchBrand(req, res, url) {
+  const brand = (url.searchParams.get('brand') || '').trim();
+  if (!brand || brand.length > 60) {
+    return json(res, 400, { ok: false, reason: 'Pass ?brand=<name>' });
+  }
+  if (!youtube.configured() && !meta.configured()) {
+    return json(res, 200, { ok: false, reason: 'No providers configured.' });
+  }
+  const key = `watchq_${brand.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+  try {
+    const r = await cache.through(key, TTL.watch, () => watchlist.changes(brand));
+    json(res, 200, { ok: true, cached: r.cached, ...r.data });
+  } catch (err) {
+    json(res, 502, { ok: false, reason: err.message });
+  }
+}
+
+/* Festival planner. Pure computation over a static table — no upstream
+   call, so no cache and no failure mode worth handling. */
+function festivalPlan(req, res, url) {
+  const region = (url.searchParams.get('region') || 'ALL').toUpperCase();
+  const months = Math.min(Math.max(Number(url.searchParams.get('months')) || 12, 1), 24);
+  if (!festivals.REGIONS[region]) {
+    return json(res, 400, { ok: false, reason: 'Unknown region', regions: festivals.REGIONS });
+  }
+  json(res, 200, {
+    ok: true,
+    region,
+    regionName: festivals.REGIONS[region],
+    regions: festivals.REGIONS,
+    months,
+    /* Said once, here, so the UI never has to invent the caveat. */
+    dateNote: 'Solar festivals (Pongal, Baisakhi, Poila Boishakh, Lohri) are exact. Lunar ones move by weeks each year and are shown as month windows — confirm the panchang date before committing spend.',
+    festivals: festivals.upcoming(region, months)
+  });
+}
+
 /* AI breakdown, metadata-only. Cached essentially forever since the
    inputs (title/description/comments) rarely change once an ad has
    been up a while, and re-running costs a real OpenAI call. */
@@ -262,6 +305,8 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/discover') return await discovered(req, res, url);
     if (url.pathname === '/api/recipe') return await recipeFor(req, res, url);
     if (url.pathname === '/api/watched') return await watchedBoard(req, res, url);
+    if (url.pathname === '/api/watch') return await watchBrand(req, res, url);
+    if (url.pathname === '/api/festivals') return festivalPlan(req, res, url);
     if (url.pathname.startsWith('/api/')) return json(res, 404, { error: 'No such route' });
     return serveStatic(req, res, url);
   } catch (err) {

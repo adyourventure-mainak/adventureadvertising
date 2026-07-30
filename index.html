@@ -92,6 +92,8 @@
     </a>
 
     <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="#watch">Competitor watch</a>
+      <a href="#festivals">Calendar</a>
       <a href="#gallery">Library</a>
       <a href="#principles">Why they travel</a>
       <a href="#builder">Brief builder</a>
@@ -185,6 +187,53 @@
 
       <p class="results" id="results" role="status" aria-live="polite"></p>
       <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────── COMPETITOR WATCH ─────────────────────────── -->
+  <section id="watch" class="section section--alt">
+    <div class="container">
+      <header class="section__head">
+        <div>
+          <p class="eyebrow">Competitor watch</p>
+          <h2>What they launched since yesterday</h2>
+        </div>
+        <p class="section__note">Add the brands you pitch against. We snapshot their YouTube uploads and live Meta creatives daily, and show you the difference — new work, stopped campaigns, and how long each one ran.</p>
+      </header>
+
+      <div class="watchbar">
+        <div class="field field--inline">
+          <label for="watchBrand" class="sr-only">Brand to watch</label>
+          <input id="watchBrand" type="text" placeholder="Zomato, Amul, Fevicol…" autocomplete="off">
+        </div>
+        <button class="btn btn--primary" id="watchAdd" type="button">Watch this brand</button>
+      </div>
+
+      <ul class="chips" id="watchChips"></ul>
+      <p class="results" id="watchStatus" role="status" aria-live="polite"></p>
+      <div id="watchBody"></div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────── FESTIVAL PLANNER ─────────────────────────── -->
+  <section id="festivals" class="section">
+    <div class="container">
+      <header class="section__head">
+        <div>
+          <p class="eyebrow">Campaign calendar</p>
+          <h2>What to book, and when</h2>
+        </div>
+        <p class="section__note">Lead times are when creative should be <em>locked</em> — not when the ad runs. Durga Puja hoardings in Bengal are committed by July; Diwali inventory goes by late August.</p>
+      </header>
+
+      <div class="field field--inline field--region">
+        <label for="festRegion">Region</label>
+        <select id="festRegion"></select>
+      </div>
+
+      <p class="results" id="festStatus" role="status" aria-live="polite">Loading…</p>
+      <ol class="fest" id="festList"></ol>
+      <p class="hint hint--foot" id="festNote" hidden></p>
     </div>
   </section>
 
@@ -408,6 +457,9 @@
 <script src="assets/live.js"></script>
 <script src="assets/viral.js"></script>
 <script src="assets/watched.js"></script>
+<script src="assets/watch.js"></script>
+<script src="assets/festivals.js"></script>
+<script type="module" src="assets/watchstore.js"></script>
 <script type="module" src="assets/auth.js"></script>
 </body>
 </html>
