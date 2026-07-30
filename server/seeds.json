@@ -2,18 +2,18 @@
   "_readme": [
     "One row per campaign in assets/data.js, keyed by the same slug.",
     "",
-    "videoId       — the brand's own upload. Pinned = 1 quota unit and zero guesswork.",
-    "officialChannel — the channel title that must match for a live count to be trusted.",
+    "videoId       \u2014 the brand's own upload. Pinned = 1 quota unit and zero guesswork.",
+    "officialChannel \u2014 the channel title that must match for a live count to be trusted.",
     "                  Third-party re-uploads carry a fraction of an ad's real reach, so",
     "                  an unverified match is reported but never allowed to overwrite the",
     "                  editorial estimate in assets/data.js.",
-    "skipResolve   — true where the brand's own upload no longer exists or is unlisted.",
+    "skipResolve   \u2014 true where the brand's own upload no longer exists or is unlisted.",
     "                Checked by hand on 2026-07-28: searching the brand's own channel",
     "                returns nothing for these. Stops the resolver burning 100 quota",
     "                units a day looking for a video that is not there. If a brand",
     "                re-uploads, set videoId and flip this to false.",
-    "metaPage      — the Facebook Page name to look up in the Meta Ad Library.",
-    "origin — where the campaign was made. Drives the globe markers and the country grouping on the sign-in screen."
+    "metaPage      \u2014 the Facebook Page name to look up in the Meta Ad Library.",
+    "origin \u2014 where the campaign was made. Drives the globe markers and the country grouping on the sign-in screen."
   ],
   "ads": [
     {
@@ -47,13 +47,7 @@
       "videoId": "M7FIvfx5J10",
       "officialChannel": "Volvo Trucks",
       "query": "Volvo Trucks The Epic Split Van Damme",
-      "metaPage": "Volvo Trucks",
-      "origin": {
-        "city": "Gothenburg",
-        "country": "Sweden",
-        "lat": 57.71,
-        "lon": 11.97
-      }
+      "metaPage": "Volvo Trucks"
     },
     {
       "id": "old-spice",
@@ -162,6 +156,72 @@
       "officialChannel": "GEICO",
       "query": "GEICO Unskippable Family",
       "metaPage": "GEICO"
+    },
+    {
+      "id": "hero-splendor",
+      "videoId": "SDTZ9I2JzIc",
+      "officialChannel": "Hero MotoCorp",
+      "origin": {
+        "city": "New Delhi",
+        "country": "India",
+        "lat": 28.61,
+        "lon": 77.21
+      }
+    },
+    {
+      "id": "amazon-india",
+      "videoId": "0XYBbiDWWLw",
+      "officialChannel": "Amazon India",
+      "origin": {
+        "city": "Bengaluru",
+        "country": "India",
+        "lat": 12.97,
+        "lon": 77.59
+      }
+    },
+    {
+      "id": "jiohotstar",
+      "videoId": "uS2Ch2qyazg",
+      "officialChannel": "JioHotstar",
+      "origin": {
+        "city": "Mumbai",
+        "country": "India",
+        "lat": 19.08,
+        "lon": 72.88
+      }
+    },
+    {
+      "id": "bisleri",
+      "videoId": "l91SQ47IJFg",
+      "officialChannel": "Bisleri",
+      "origin": {
+        "city": "Mumbai",
+        "country": "India",
+        "lat": 19.08,
+        "lon": 72.88
+      }
+    },
+    {
+      "id": "flipkart-bbd",
+      "videoId": "cqgvtN5yMx8",
+      "officialChannel": "Flipkart",
+      "origin": {
+        "city": "Bengaluru",
+        "country": "India",
+        "lat": 12.97,
+        "lon": 77.59
+      }
+    },
+    {
+      "id": "apollo-tyres",
+      "videoId": "D_RJhCZNNT8",
+      "officialChannel": "Apollo Tyres",
+      "origin": {
+        "city": "Gurugram",
+        "country": "India",
+        "lat": 28.46,
+        "lon": 77.03
+      }
     }
   ]
 }
