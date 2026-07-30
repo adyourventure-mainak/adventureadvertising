@@ -12,10 +12,11 @@
 </head>
 <body>
 
-<a class="skip" href="#gallery">Skip to the library</a>
+<a class="skip" href="#recent">Skip to the ads</a>
 
 <!-- ─────────────────────────── SIGN IN ─────────────────────────── -->
 <div class="gate" id="gate">
+  <div class="gate__lines" id="gateLines" aria-hidden="true"></div>
   <div class="gate__grid">
 
     <div class="gate__panel">
@@ -95,10 +96,8 @@
       <a href="#watch">Competitor watch</a>
       <a href="#festivals">Calendar</a>
       <a href="#recent">Live ads</a>
-      <a href="#gallery">Archive</a>
-      <a href="#principles">Why they travel</a>
+      <a href="archive.html">Archive</a>
       <a href="#builder">Brief builder</a>
-      <a href="#ethics">Ground rules</a>
       <a class="btn btn--sm btn--primary" href="#builder">Build my brief</a>
       <div class="account" id="account" hidden>
         <span class="account__live" id="navLive" hidden><i class="dot" aria-hidden="true"></i><b id="navLiveCount">0</b></span>
@@ -123,10 +122,10 @@
         <h1 class="reveal">The ads everyone watched — and the recipe under each one.</h1>
         <p class="lede reveal">Seven campaigns with a verified live view count, taken apart beat by beat. Then a builder that rebuilds any of those structures around <em>your</em> product, with timecodes and a shot list you can hand to a camera operator.</p>
         <div class="hero__cta reveal">
-          <a class="btn btn--primary" href="#gallery">Open the library</a>
+          <a class="btn btn--primary" href="#recent">See live ads</a>
           <a class="btn btn--ghost" href="#builder">Build my brief</a>
         </div>
-        <p class="hero__note reveal">Every ad plays here, and every view count is read live from YouTube — <a href="#ethics">the note on numbers</a>.</p>
+        <p class="hero__note reveal">Every ad plays here, and every view count is read live from YouTube.</p>
       </div>
 
       <!-- SIGNATURE ELEMENT: the retention anatomy card -->
@@ -171,26 +170,6 @@
   </section>
 
   <!-- ─────────────────────────── GALLERY ─────────────────────────── -->
-  <section id="gallery" class="section">
-    <div class="container">
-      <header class="section__head">
-        <div>
-          <p class="eyebrow">Archive</p>
-          <h2>All-time highest views, taken apart</h2>
-        </div>
-        <p class="section__note">The campaigns worth studying rather than copying — decade-old work whose structure still holds. Counts are read live from each brand's own upload. For what is running now, see <a href="#recent">Live ads</a>.</p>
-      </header>
-
-      <div class="filters" role="group" aria-label="Filter the library">
-        <div class="filters__row" id="filterFormat"></div>
-        <div class="filters__row filters__row--sub" id="filterBudget"></div>
-      </div>
-
-      <p class="results" id="results" role="status" aria-live="polite"></p>
-      <div class="grid" id="grid"></div>
-    </div>
-  </section>
-
   <!-- ─────────────────────────── LIVE ADS ─────────────────────────── -->
   <section id="recent" class="section">
     <div class="container">
@@ -354,21 +333,6 @@
   </section>
 
   <!-- ─────────────────────────── PRINCIPLES ─────────────────────────── -->
-  <section id="principles" class="section section--alt">
-    <div class="container">
-      <header class="section__head">
-        <div>
-          <p class="eyebrow">Why they travel</p>
-          <h2>Five things every ad in this library does</h2>
-        </div>
-        <p class="section__note">Budget is the least common factor here. Two of these seven were shot for under $5,000.</p>
-      </header>
-
-      <ol class="principles" id="principles-list"></ol>
-    </div>
-  </section>
-
-  <!-- ─────────────────────────── BUILDER ─────────────────────────── -->
   <section id="builder" class="section">
     <div class="container">
       <header class="section__head">
@@ -423,22 +387,6 @@
   </section>
 
   <!-- ─────────────────────────── ETHICS ─────────────────────────── -->
-  <section id="ethics" class="section section--alt">
-    <div class="container ethics">
-      <div>
-        <p class="eyebrow">Ground rules</p>
-        <h2>Copy the structure. Never the film.</h2>
-        <p class="prose">Every breakdown here describes <em>how</em> a piece was built — the order of the beats, where the tension sits, what the camera does. That's craft, and craft is meant to be studied and reused. The scripts, footage, music, characters, and taglines are not: they're owned, and lifting them gets your ad pulled and your client sued.</p>
-        <p class="prose">A workable test before you shoot: if someone who has seen the original watches yours and thinks <em>“same trick, different product”</em>, you're fine. If they think <em>“that's the Volvo ad”</em>, you're not.</p>
-      </div>
-      <aside class="callout">
-        <h3>About the view counts</h3>
-        <p>Every figure here is read live from the YouTube Data API against the brand's own upload, so it is exact rather than estimated — and it will have moved by the time you read it.</p>
-        <p>The library is deliberately short. Plenty of famous campaigns are missing because the brands deleted their own uploads, and the only surviving copies are third-party re-uploads whose counts are off by up to a thousandfold. Rather than publish a number that wrong, those entries are held back until the original reappears.</p>
-        <p>One caveat that applies to all of them: a single upload's count is not a campaign's reach. Broadcast, paid social and re-cuts are not in these numbers.</p>
-      </aside>
-    </div>
-  </section>
 </main>
 
 <footer class="footer">
@@ -452,11 +400,11 @@
     </div>
     <nav aria-label="Library">
       <h4>Library</h4>
-      <ul><li><a href="#recent">Live ads</a></li><li><a href="#gallery">Archive</a></li><li><a href="#gallery" data-jump="stunt">Stunt &amp; demo</a></li><li><a href="#gallery" data-jump="emotional">Emotional turn</a></li><li><a href="#gallery" data-jump="comedy">Comedy</a></li></ul>
+      <ul><li><a href="#recent">Live ads</a></li><li><a href="#watch">Competitor watch</a></li><li><a href="#festivals">Calendar</a></li><li><a href="archive.html">Archive</a></li></ul>
     </nav>
     <nav aria-label="Make one">
       <h4>Make one</h4>
-      <ul><li><a href="#builder">Brief builder</a></li><li><a href="#principles">The five principles</a></li><li><a href="#ethics">Copy rules</a></li></ul>
+      <ul><li><a href="#builder">Brief builder</a></li><li><a href="archive.html">Archive teardowns</a></li></ul>
     </nav>
     <div>
       <h4>Caveat</h4>
@@ -488,6 +436,7 @@
 <script src="assets/watch.js"></script>
 <script src="assets/festivals.js"></script>
 <script src="assets/recent.js"></script>
+<script src="assets/gatelines.js"></script>
 <script type="module" src="assets/watchstore.js"></script>
 <script type="module" src="assets/auth.js"></script>
 </body>

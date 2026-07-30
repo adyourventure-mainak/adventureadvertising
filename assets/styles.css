@@ -708,3 +708,15 @@ h4{font-size:14px;letter-spacing:-.01em;font-weight:600}
 .legal .stat em{font-style:normal;font-size:12px;color:var(--text-faint)}
 .legal code{background:var(--surface-2);padding:1px 5px;border-radius:4px;font-size:.9em}
 .flag--earned{color:var(--live);border-color:rgba(18,135,74,.3);background:var(--live-soft)}
+
+/* ── Gate lines ────────────────────────────────────────────────
+   Sits behind the sign-in panel. Pointer-events off so it can never
+   swallow a click on the sign-in button, and masked at the edges so
+   the ribbons fade out instead of ending abruptly at the viewport. */
+.gate__lines{
+  position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  -webkit-mask-image:radial-gradient(120% 90% at 50% 55%,#000 35%,transparent 78%);
+  mask-image:radial-gradient(120% 90% at 50% 55%,#000 35%,transparent 78%);
+}
+.gate__lines svg{width:100%;height:100%;display:block}
+.gate__grid{position:relative;z-index:1}

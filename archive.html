@@ -1,0 +1,67 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Archive — Adventure Advertising</title>
+<meta name="description" content="All-time highest-viewed ads, taken apart beat by beat. Kept for study rather than presented as current work.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+
+<header class="nav" id="nav">
+  <div class="container nav__inner">
+    <a class="brand" href="/" aria-label="Adventure Advertising, home">
+      <svg class="brand__mark" viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="3.5" width="21" height="17" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 9.2v5.6l4.6-2.8z" fill="currentColor"/></svg>
+      <span class="brand__text">Adventure&nbsp;<span class="brand__text--soft">Advertising</span></span>
+    </a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="/#recent">Live ads</a>
+      <a href="/#watch">Competitor watch</a>
+      <a href="/#festivals">Calendar</a>
+      <a class="btn btn--sm btn--primary" href="/#builder">Build my brief</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section id="gallery" class="section">
+    <div class="container">
+      <header class="section__head">
+        <div>
+          <p class="eyebrow">Archive</p>
+          <h2>All-time highest views, taken apart</h2>
+        </div>
+        <p class="section__note">The campaigns worth studying rather than copying — decade-old work whose structure still holds. Counts are read live from each brand's own upload. For what is running now, see <a href="#recent">Live ads</a>.</p>
+      </header>
+
+      <div class="filters" role="group" aria-label="Filter the library">
+        <div class="filters__row" id="filterFormat"></div>
+        <div class="filters__row filters__row--sub" id="filterBudget"></div>
+      </div>
+
+      <p class="results" id="results" role="status" aria-live="polite"></p>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet__scrim" data-close></div>
+  <div class="sheet__panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" id="sheetPanel">
+    <button class="sheet__close" data-close aria-label="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <div id="sheetBody"></div>
+  </div>
+</div>
+
+</main>
+
+<footer class="footer">
+  <div class="container footer__base">
+    <p>These are historic campaigns kept for study. For what is running now, see <a href="/#recent">Live ads</a>.</p>
+    <p class="footer__legal"><a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Use</a></p>
+  </div>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/live.js"></script>

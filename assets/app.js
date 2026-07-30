@@ -95,6 +95,7 @@
   const state = { format: 'all', budget: 'any' };
   const grid = $('#grid');
   const results = $('#results');
+  const hasGallery = !!grid;
 
   function chips(host, items, key) {
     host.innerHTML = items.map(i =>
@@ -110,6 +111,7 @@
   }
 
   function renderGrid() {
+    if (!hasGallery) return;
     const list = visible();
     const live = list.some(a => a.live);
     results.textContent = list.length
@@ -149,8 +151,8 @@
   const present = (list, field) => list.filter((i, idx) =>
     idx === 0 || ADS.some(a => a[field] === i.id));
 
-  chips($('#filterFormat'), present(CATEGORIES, 'category'), 'format');
-  chips($('#filterBudget'), present(BUDGETS, 'budget'), 'budget');
+  if ($('#filterFormat')) chips($('#filterFormat'), present(CATEGORIES, 'category'), 'format');
+  if ($('#filterBudget')) chips($('#filterBudget'), present(BUDGETS, 'budget'), 'budget');
   renderGrid();
 
   /* Only the library's own chips. Other sections use .chip too, and a
@@ -178,9 +180,11 @@
 
   /* ── detail sheet ─────────────────────────────────────── */
   const sheet = $('#sheet'), sheetBody = $('#sheetBody'), sheetPanel = $('#sheetPanel');
+  const hasSheet = !!sheet;
   let lastFocus = null;
 
   function openSheet(id, trigger) {
+    if (!hasSheet) return;
     const ad = ADS.find(a => a.id === id);
     if (!ad) return;
     lastFocus = trigger || document.activeElement;
@@ -257,6 +261,7 @@
   }
 
   function closeSheet() {
+    if (!hasSheet) return;
     sheet.hidden = true;
     document.body.style.overflow = '';
     /* Hiding the panel does not stop an embed — tear the iframe out or the
@@ -287,15 +292,18 @@
       $('#bFormula').value = f.dataset.formula;
       syncFormulaHint();
       generate();
-      $('#builder').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      $('#builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !sheet.hidden) closeSheet();
+    if (e.key === 'Escape' && hasSheet && !sheet.hidden) closeSheet();
   });
 
   /* ── principles ───────────────────────────────────────── */
-  $('#principles-list').innerHTML = PRINCIPLES.map(p => `
+  /* Sections come and go between pages now (the archive lives on its
+     own page, principles were removed) so every block below checks
+     for its host element rather than assuming one page shape. */
+  if ($('#principles-list')) $('#principles-list').innerHTML = PRINCIPLES.map(p => `
     <li class="principle reveal">
       <span class="principle__n">${p.n}</span>
       <div><h3>${esc(p.h)}</h3><p>${esc(p.p)}</p></div>
@@ -304,6 +312,7 @@
 
   /* ── brief builder ────────────────────────────────────── */
   const fSel = $('#bFormula');
+  if (!fSel) return;                       /* page without the builder */
   fSel.innerHTML = FORMULAS.map(f => `<option value="${f.id}">${esc(f.name)} — ${esc(f.lineage)}</option>`).join('');
 
   let length = 60;

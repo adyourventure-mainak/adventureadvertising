@@ -276,7 +276,7 @@ async function recipeFor(req, res, url) {
    every time a file is added. Allowlist instead: the page, its assets, and
    the handful of files a browser asks for by convention. Anything else —
    package.json, README, scripts/, the git checkout — is not web content. */
-const PUBLIC_FILES = new Set(['/index.html', '/privacy.html', '/terms.html', '/admin.html', '/favicon.ico', '/robots.txt', '/sitemap.xml']);
+const PUBLIC_FILES = new Set(['/index.html', '/privacy.html', '/terms.html', '/admin.html', '/archive.html', '/favicon.ico', '/robots.txt', '/sitemap.xml']);
 const servable = rel => PUBLIC_FILES.has(rel) || rel.startsWith('/assets/');
 
 function serveStatic(req, res, url) {
