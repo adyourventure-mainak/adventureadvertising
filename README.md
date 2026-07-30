@@ -69,6 +69,7 @@ with the `ads_read` scope in the Graph API Explorer and extend it to 60 days wit
 | `GET /api/health` | Which providers are configured and what each one can give you |
 | `GET /api/library` | Slug-keyed live YouTube stats for every seed. `?refresh=1` bypasses the cache |
 | `GET /api/meta?term=Nike` | Meta Ad Library search. `&countries=IE,DE` `&adType=POLITICAL_AND_ISSUE_ADS` `&limit=12` |
+| `GET /api/watched?platform=youtube` | Most-watched per platform. `youtube` = real view counts; `facebook`/`instagram` = ads by EU reach, no organic data exists |
 | `GET /api/viral` | YouTube + Meta ranked by audience gained per day. `?days=60` `?running=1` `?limit=12` |
 
 Responses are cached to `server/.cache/` (15 min for the library, 1h for Meta searches). If
@@ -202,6 +203,36 @@ body replaced by a notice. They reached people, but there is nothing to study.
 
 Cached 60 minutes (`VIRAL_TTL_MINUTES`) per window; it costs one Meta call per search
 term, so the first uncached load of a window takes a few seconds.
+
+## Most watched, per platform (`/api/watched`)
+
+YouTube is the only one of the three that publishes view counts for content you do
+not own. That is the shape of the platforms, not a gap in the code:
+
+| Platform | Organic videos | Ads |
+| --- | --- | --- |
+| **YouTube** | ✅ exact lifetime views, any public video | ✅ same |
+| **Facebook** | ❌ Graph API covers only Pages you administer | ⚠️ Ad Library, **EU reach only** |
+| **Instagram** | ❌ Graph API covers only accounts you manage; Basic Display retired Dec 2024 | ⚠️ same |
+
+The tool that did give public Facebook/Instagram post performance was **CrowdTangle**,
+which Meta shut down in August 2024. Its replacement, the Meta Content Library, needs
+an approved research application — a normal `ads_read` token gets a flat 400, which
+this project verified rather than assumed.
+
+So Facebook and Instagram show **ads only**, ranked by EU reach, labelled "reached in
+the EU" and never "views". Where a platform genuinely cannot answer, the reason is
+printed on the page: an empty list with no explanation would read as "nothing is
+happening on Instagram", which is false — the truth is "Instagram does not publish
+this".
+
+One honest caveat on the Meta boards: most ads run on Facebook *and* Instagram, so the
+two lists overlap heavily. The platform tag is what Meta reports per creative.
+
+## AI breakdowns are backend-only
+
+`/api/recipe` still exists and works (see below) but is **not rendered on the site**.
+It is there for the subscriber flow: analysis on request, not on every page view.
 
 ## AI breakdowns (`/api/recipe`)
 

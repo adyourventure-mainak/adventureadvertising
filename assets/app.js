@@ -234,11 +234,6 @@
         <p class="prose">${esc(ad.cost)}</p>
       </div>
 
-      ${ad.videoId ? `<div class="sheet__block" id="aiBlock" data-video="${esc(ad.videoId)}">
-        <h3>AI read the description and comments</h3>
-        <p class="ai-status" id="aiStatus">Reading the public listing…</p>
-      </div>` : ''}
-
       <div class="sheet__block">
         <div class="warn"><b>Where this goes wrong</b>${esc(ad.trap)}</div>
         ${ad.live ? `<div class="livebox">
@@ -259,44 +254,6 @@
     sheetPanel.scrollTop = 0;
     sheetPanel.focus();
 
-    loadAiBreakdown();
-  }
-
-  /* Fetched only once the sheet is open, and only once per video — no
-     point costing an OpenAI call for a panel nobody looked at. */
-  const aiCache = new Map();
-
-  async function loadAiBreakdown() {
-    const block = $('#aiBlock');
-    if (!block) return;
-    const videoId = block.dataset.video;
-    const status = $('#aiStatus');
-
-    const render = d => {
-      if (!block.isConnected) return;                 /* sheet closed mid-fetch */
-      if (!d || !d.ok) {
-        block.hidden = true;                           /* say nothing rather than show a stub */
-        return;
-      }
-      block.innerHTML = `
-        <h3>AI read the description and comments</h3>
-        <p class="ai-disclosure">${esc(d.disclosure)}</p>
-        <p class="ai-mechanism"><b>Likely mechanism:</b> ${esc(d.mechanism)}</p>
-        <ul class="ai-beats">${d.beats.map(b => `
-          <li><b>${esc(b.label)}.</b> ${esc(b.note)}</li>`).join('')}
-        </ul>
-        <p class="ai-confidence">Confidence: ${esc(d.confidence)} · model ${esc(d.model)}${d.cached ? ' · cached' : ''}</p>`;
-    };
-
-    if (aiCache.has(videoId)) return render(aiCache.get(videoId));
-
-    try {
-      const d = await (await fetch('/api/recipe?videoId=' + encodeURIComponent(videoId))).json();
-      aiCache.set(videoId, d);
-      render(d);
-    } catch {
-      if (status) block.hidden = true;                 /* no server, or offline — stay quiet */
-    }
   }
 
   function closeSheet() {

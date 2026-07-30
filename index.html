@@ -188,6 +188,30 @@
     </div>
   </section>
 
+  <!-- ─────────────────────────── MOST WATCHED ─────────────────────────── -->
+  <section id="watched" class="section">
+    <div class="container">
+      <header class="section__head">
+        <div>
+          <p class="eyebrow">Most watched</p>
+          <h2>What the platforms are actually serving</h2>
+        </div>
+        <p class="section__note">Trending videos and running ads, per platform. Each number is labelled with what it actually measures — the three platforms do not publish the same thing, and pretending they do would be the easiest lie on this site.</p>
+      </header>
+
+      <div class="filters" role="group" aria-label="Platform">
+        <div class="filters__row" id="watchedTabs">
+          <button class="chip" type="button" data-platform="youtube" aria-pressed="true">YouTube</button>
+          <button class="chip" type="button" data-platform="facebook" aria-pressed="false">Facebook</button>
+          <button class="chip" type="button" data-platform="instagram" aria-pressed="false">Instagram</button>
+        </div>
+      </div>
+
+      <p class="results" id="watchedStatus" role="status" aria-live="polite">Loading…</p>
+      <div id="watchedBody"></div>
+    </div>
+  </section>
+
   <!-- ─────────────────────────── VIRAL ─────────────────────────── -->
   <section id="viral" class="section section--alt">
     <div class="container">
@@ -383,6 +407,7 @@
 <script src="assets/app.js"></script>
 <script src="assets/live.js"></script>
 <script src="assets/viral.js"></script>
+<script src="assets/watched.js"></script>
 <script type="module" src="assets/auth.js"></script>
 </body>
 </html>

@@ -17,6 +17,7 @@ const meta = require('./meta');
 const viral = require('./viral');
 const discover = require('./discover');
 const recipe = require('./recipe');
+const watched = require('./watched');
 
 const PORT = Number(process.env.PORT) || 8123;
 const SEEDS = JSON.parse(fs.readFileSync(path.join(__dirname, 'seeds.json'), 'utf8')).ads;
@@ -28,7 +29,8 @@ const TTL = {
   meta: Number(process.env.META_TTL_MINUTES || 60) * 60_000,
   viral: Number(process.env.VIRAL_TTL_MINUTES || 60) * 60_000,
   discover: Number(process.env.DISCOVER_TTL_MINUTES || 720) * 60_000,
-  recipe: Number(process.env.RECIPE_TTL_MINUTES || 43200) * 60_000  /* 30 days — metadata does not change */
+  recipe: Number(process.env.RECIPE_TTL_MINUTES || 43200) * 60_000,   /* 30 days — metadata does not change */
+  watched: Number(process.env.WATCHED_TTL_MINUTES || 60) * 60_000
 };
 
 const MIME = {
@@ -169,6 +171,24 @@ async function discovered(req, res, url) {
   }
 }
 
+/* Most watched, per platform. YouTube gives real view counts; Meta
+   gives EU reach on ads only and nothing organic at all — watched.js
+   carries the explanation, and it is passed through to the reader
+   rather than being silently rendered as an empty list. */
+async function watchedBoard(req, res, url) {
+  const platform = (url.searchParams.get('platform') || 'youtube').toLowerCase();
+  if (!['youtube', 'facebook', 'instagram'].includes(platform)) {
+    return json(res, 400, { ok: false, reason: 'platform must be youtube, facebook or instagram' });
+  }
+  const limit = Math.min(Number(url.searchParams.get('limit')) || 12, 40);
+  try {
+    const r = await cache.through(`watched_${platform}_${limit}`, TTL.watched, () => watched.board(platform, limit));
+    json(res, 200, { ok: true, cached: r.cached, fetchedAt: new Date(r.savedAt).toISOString(), ...r.data });
+  } catch (err) {
+    json(res, 502, { ok: false, reason: err.message });
+  }
+}
+
 /* AI breakdown, metadata-only. Cached essentially forever since the
    inputs (title/description/comments) rarely change once an ad has
    been up a while, and re-running costs a real OpenAI call. */
@@ -241,6 +261,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/viral') return await viralBoard(req, res, url);
     if (url.pathname === '/api/discover') return await discovered(req, res, url);
     if (url.pathname === '/api/recipe') return await recipeFor(req, res, url);
+    if (url.pathname === '/api/watched') return await watchedBoard(req, res, url);
     if (url.pathname.startsWith('/api/')) return json(res, 404, { error: 'No such route' });
     return serveStatic(req, res, url);
   } catch (err) {
