@@ -72,6 +72,7 @@ with the `ads_read` scope in the Graph API Explorer and extend it to 60 days wit
 | `GET /api/watched?platform=youtube` | Most-watched per platform. `youtube` = real view counts; `facebook`/`instagram` = ads by EU reach, no organic data exists |
 | `GET /api/watch?brand=Zomato` | Competitor diff — what launched/stopped since the last baseline |
 | `GET /api/festivals?region=WB` | Regional campaign calendar with lock-by dates |
+| `POST /api/brief` | AI brief. Structure and timings come from the client as fact; the model only writes the words |
 | `GET /api/viral` | YouTube + Meta ranked by audience gained per day. `?days=60` `?running=1` `?limit=12` |
 
 Responses are cached to `server/.cache/` (15 min for the library, 1h for Meta searches). If
@@ -307,6 +308,29 @@ and that is where the home market is actually served.
 
 `/api/recipe` still exists and works (see below) but is **not rendered on the site**.
 It is there for the subscriber flow: analysis on request, not on every page view.
+
+## AI brief writer (`POST /api/brief`)
+
+The split is the point. The **beat structure and its timecodes come from the formula
+the user picked** — real proportions from campaigns that worked, computed client-side
+and sent to the server as fact. The model only writes the words that go in each beat,
+and the timings are re-attached from our structure on the way out, so a timecode can
+never drift from the formula it came from.
+
+That leaves the model doing what language models are good at (writing to a brief) and
+none of what they are bad at (inventing evidence). It is told never to claim a result,
+a statistic or a customer quote, because it has none.
+
+Validation rejects rather than repairs: a brief that quietly lost two beats is worse
+than one that failed loudly, because someone would shoot the short version without
+noticing.
+
+**The button always produces something.** The deterministic brief renders instantly and
+stays on screen while the model writes; if the call fails, times out or comes back
+malformed, a quiet line appears under the existing brief rather than an error dialog.
+The AI is an upgrade, not a dependency.
+
+Requires `OPENAI_API_KEY`. Model via `BRIEF_MODEL` (default `gpt-5.4-nano`).
 
 ## AI breakdowns (`/api/recipe`)
 

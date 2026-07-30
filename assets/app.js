@@ -403,8 +403,18 @@
         </div>
       </article>`;
 
-    $('#bCopy').addEventListener('click', async e => {
-      const text = plain(brief);
+    wireCopy(() => plain(brief));
+  }
+
+  /* Both the template brief and the AI brief need this, and the
+     clipboard fallback is fiddly enough that having two copies of it
+     would guarantee they drift. Takes a getter so it does not care
+     which brief it is copying. */
+  function wireCopy(getText) {
+    const btn = $('#bCopy');
+    if (!btn) return;
+    btn.addEventListener('click', async e => {
+      const text = getText();
       let ok = false;
       try {
         await navigator.clipboard.writeText(text);
@@ -454,9 +464,127 @@
 
   function generate() { render(buildBrief()); }
 
-  $('#bGenerate').addEventListener('click', generate);
+  /* ── AI pass ──────────────────────────────────────────────
+     The deterministic brief renders first and stays on screen while
+     the model writes, so the button never leaves an empty panel and
+     a failed call costs nothing — the reader keeps a usable brief
+     either way. Structure and timecodes are sent as fact; the model
+     only fills them in. */
+  const btn = $('#bGenerate');
+
+  async function generateAI() {
+    const brief = buildBrief();
+    render(brief);                       /* baseline first, instantly */
+
+    const { f, p, beats } = brief;
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Writing…';
+
+    let d;
+    try {
+      const res = await fetch('/api/brief', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          product: p.product, brand: p.brand, audience: p.audience, promise: p.promise,
+          formula: f.name, lengthSeconds: length,
+          beats: beats.map((b, i) => ({
+            id: 'b' + (i + 1), time: `${tc(b.start)}–${tc(b.end)}`, heading: b.h
+          }))
+        })
+      });
+      d = await res.json();
+    } catch {
+      d = { ok: false, reason: 'Could not reach the server.' };
+    } finally {
+      btn.disabled = false;
+      btn.textContent = label;
+    }
+
+    if (!d || !d.ok) {
+      note(d && d.reason ? d.reason : 'The writer is unavailable.');
+      return;
+    }
+    renderAI(brief, d);
+  }
+
+  /* A quiet line under the brief, not an alert: the template brief is
+     still there and still usable, so a failure is a downgrade rather
+     than an error. */
+  function note(reason) {
+    const out = $('#briefOut .brief');
+    if (!out) return;
+    const p = document.createElement('p');
+    p.className = 'brief__ainote';
+    p.textContent = `Written from the formula. AI pass unavailable — ${reason}`;
+    out.appendChild(p);
+  }
+
+  function renderAI(brief, d) {
+    const { f, p } = brief;
+    $('#briefOut').innerHTML = `
+      <article class="brief">
+        <div class="brief__head">
+          <div>
+            <h3>${esc(f.name)} · ${length >= 60 ? tc(length) : length + 's'} · ${esc(p.brand)}</h3>
+            <p class="brief__sub">Written to the <em>${esc(f.name.toLowerCase())}</em> structure for ${esc(p.audience)}, around one claim: <em>${esc(p.promise)}</em>.</p>
+          </div>
+          <button class="btn btn--ghost btn--sm" type="button" id="bCopy">Copy as text</button>
+        </div>
+
+        <div class="brief__block">
+          <p class="brief__label">Three openings to test</p>
+          <ul class="hooks">${d.hooks.map((h, i) =>
+            `<li><span>Hook ${i + 1}</span>${esc(h)}</li>`).join('')}</ul>
+        </div>
+
+        <div class="brief__block">
+          <p class="brief__label">Beat sheet</p>
+          <ul class="sheetlist">${d.beats.map(b =>
+            `<li><span class="t">${esc(b.time)}</span>
+             <span class="d"><b>${esc(b.heading)}</b><span>${esc(b.direction)}</span></span></li>`).join('')}</ul>
+        </div>
+
+        ${d.vo ? `<div class="brief__block">
+          <p class="brief__label">Voiceover / on-screen text</p>
+          <p class="brief__vo">${esc(d.vo)}</p>
+        </div>` : ''}
+
+        <div class="brief__block">
+          <p class="brief__label">Shot list</p>
+          <ul class="steps">${d.shots.map(sh => `<li><span>${esc(sh)}</span></li>`).join('')}</ul>
+        </div>
+
+        <div class="brief__block">
+          <div class="warn"><b>Where this goes wrong</b>${esc(d.trap)}</div>
+        </div>
+
+        <p class="brief__ainote">Beats and timecodes come from the ${esc(f.name.toLowerCase())} structure; the words were written by ${esc(d.model)}. Read it before you shoot it.</p>
+      </article>`;
+    wireCopy(() => aiText(brief, d));
+  }
+
+  function aiText(brief, d) {
+    const { f, p } = brief;
+    return [
+      `${f.name} · ${length}s · ${p.brand}`,
+      `Claim: ${p.promise}`,
+      `Audience: ${p.audience}`,
+      '',
+      'HOOKS', ...d.hooks.map((h, i) => `${i + 1}. ${h}`),
+      '', 'BEATS', ...d.beats.map(b => `${b.time}  ${b.heading} — ${b.direction}`),
+      ...(d.vo ? ['', 'VOICEOVER', d.vo] : []),
+      '', 'SHOTS', ...d.shots.map(s => `- ${s}`),
+      '', 'WHERE IT GOES WRONG', d.trap,
+      '', `Structure from the ${f.name.toLowerCase()} formula; words by ${d.model}.`,
+      'Copy the structure, never the film.'
+    ].join('\n');
+  }
+
+  btn.addEventListener('click', generateAI);
   $$('#bProduct, #bBrand, #bAudience, #bPromise').forEach(i =>
-    i.addEventListener('keydown', e => { if (e.key === 'Enter') generate(); }));
+    i.addEventListener('keydown', e => { if (e.key === 'Enter') generateAI(); }));
 
   $('#briefOut').innerHTML = `<div class="empty">Fill the fields and generate — you'll get hooks, a timed beat sheet, a shot list, and the specific way this structure fails.</div>`;
   generate();

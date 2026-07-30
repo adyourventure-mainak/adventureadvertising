@@ -910,3 +910,5 @@ h4{font-size:14px;letter-spacing:-.01em;font-weight:600}
   .reveal{opacity:1;transform:none}
   .wlist .wrow,.fest__row,.viral .vrow{animation:none}
 }
+.brief__ainote{font-size:12.5px;color:var(--text-faint);margin-top:var(--s-4);line-height:1.5;text-align:left}
+.brief__vo{font-size:15px;line-height:1.6;white-space:pre-wrap;background:var(--surface-2);border-radius:var(--r-md);padding:var(--s-4);text-align:left}

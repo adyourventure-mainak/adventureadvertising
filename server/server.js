@@ -20,6 +20,7 @@ const recipe = require('./recipe');
 const watched = require('./watched');
 const watchlist = require('./watchlist');
 const festivals = require('./festivals');
+const brief = require('./brief');
 
 const PORT = Number(process.env.PORT) || 8123;
 const SEEDS = JSON.parse(fs.readFileSync(path.join(__dirname, 'seeds.json'), 'utf8')).ads;
@@ -270,6 +271,71 @@ async function recipeFor(req, res, url) {
   }
 }
 
+/* First POST route on the server, so it brings its own body reader.
+   Capped hard: this endpoint spends money per call, and an unbounded
+   body is the cheapest way to turn that into someone else's bill. */
+function readJson(req, limit = 8_000) {
+  return new Promise((resolve, reject) => {
+    let size = 0, done = false;
+    const chunks = [];
+    req.on('data', c => {
+      if (done) return;
+      size += c.length;
+      if (size > limit) {
+        /* Stop reading, but do NOT destroy the socket — the response
+           still has to go out, and destroying it first means the
+           caller gets an empty reply instead of a reason. */
+        done = true;
+        req.pause();
+        reject(new Error('Body too large'));
+        return;
+      }
+      chunks.push(c);
+    });
+    req.on('end', () => {
+      if (done) return;
+      try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}')); }
+      catch { reject(new Error('Invalid JSON body')); }
+    });
+    req.on('error', reject);
+  });
+}
+
+/* The AI brief. Structure and timings arrive from the client as fact —
+   they come from the chosen formula — and the model only writes the
+   words that fill them. */
+async function briefWrite(req, res) {
+  if (req.method !== 'POST') return json(res, 405, { ok: false, reason: 'POST only' });
+  if (!brief.configured()) {
+    return json(res, 200, { ok: false, reason: 'OPENAI_API_KEY is not set on the server.' });
+  }
+
+  let body;
+  try { body = await readJson(req); }
+  catch (err) { return json(res, 400, { ok: false, reason: err.message }); }
+
+  const str = (v, max) => String(v ?? '').trim().slice(0, max);
+  const beats = Array.isArray(body.beats) ? body.beats.slice(0, 12) : [];
+  if (!beats.length) return json(res, 400, { ok: false, reason: 'No beat structure supplied.' });
+
+  try {
+    const out = await brief.write({
+      product: str(body.product, 200),
+      brand: str(body.brand, 80),
+      audience: str(body.audience, 240),
+      promise: str(body.promise, 240),
+      formula: str(body.formula, 80),
+      lengthSeconds: Math.min(Math.max(Number(body.lengthSeconds) || 60, 6), 600),
+      beats: beats.map(b => ({
+        id: str(b.id, 40), time: str(b.time, 24), heading: str(b.heading, 120)
+      }))
+    });
+    json(res, 200, out);
+  } catch (err) {
+    json(res, 200, { ok: false, reason: err.message });
+  }
+}
+
 /* ── static ──────────────────────────────────────────────────── */
 
 /* The document root is the repo itself, so a denylist would have to grow
@@ -312,6 +378,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/watched') return await watchedBoard(req, res, url);
     if (url.pathname === '/api/watch') return await watchBrand(req, res, url);
     if (url.pathname === '/api/festivals') return festivalPlan(req, res, url);
+    if (url.pathname === '/api/brief') return await briefWrite(req, res);
     if (url.pathname.startsWith('/api/')) return json(res, 404, { error: 'No such route' });
     return serveStatic(req, res, url);
   } catch (err) {
