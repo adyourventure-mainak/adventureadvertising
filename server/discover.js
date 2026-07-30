@@ -52,6 +52,17 @@ const REUPLOAD = /\b(fan|archive|classic|vintage|best of|compilation|collection|
 /* Titles that mean "about an ad" rather than "is an ad". */
 const NOT_AD = /\b(reaction|review|breakdown|explained|behind the scenes|making of|how i|tutorial|compilation|top \d+|vs\.?|trailer)\b/i;
 
+/* Creator commentary is the hardest thing to filter here, because it
+   ranks ABOVE real advertising on engagement — people like a video
+   about ads far more than they like an ad. Sorting by likes-per-view
+   surfaced "Never Skip a Thai Ad 🤯" and "Indian Cricketers ke funny
+   Tv Ads #shorts" above Apple and Apollo Tyres.
+   Two tells that cost almost nothing: brand channels rarely put emoji
+   in an ad's title, and a brand almost never tags its campaign film
+   #shorts. */
+const CREATOR = /#shorts?\b/i;
+const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
+
 const MIN_VIEWS = Number(process.env.DISCOVER_MIN_VIEWS || 1_000_000);
 const MIN_SECS = 5;
 const MAX_SECS = 300;
@@ -94,17 +105,25 @@ function engagement(views, likes) {
   };
 }
 
-async function sweep() {
+/* days = 0 means all time, which is what the archive wants. Anything
+   else becomes publishedAfter, so the main board shows work from the
+   last year rather than a decade-old film nobody can pitch against. */
+async function sweep({ days = 365 } = {}) {
   const seen = new Set();
   const ids = [];
+
+  const params = {
+    part: 'snippet', type: 'video', maxResults: '50',
+    order: 'viewCount', videoEmbeddable: 'true'
+  };
+  if (days > 0) {
+    params.publishedAfter = new Date(Date.now() - days * 86400000).toISOString();
+  }
 
   for (const q of QUERIES) {
     let r;
     try {
-      r = await call('/search', {
-        part: 'snippet', q, type: 'video', maxResults: '50',
-        order: 'viewCount', videoEmbeddable: 'true'
-      });
+      r = await call('/search', { ...params, q });
     } catch {
       continue;                     /* one bad query must not empty the sweep */
     }
@@ -133,6 +152,7 @@ async function sweep() {
       if (secs < MIN_SECS || secs > MAX_SECS) continue;
       if (REUPLOAD.test(channel)) continue;          /* not the brand's own upload */
       if (NOT_AD.test(title)) continue;              /* about an ad, not an ad */
+      if (CREATOR.test(title) || EMOJI.test(title)) continue;   /* creator commentary */
 
       out.push({
         id: v.id,
@@ -159,9 +179,11 @@ async function sweep() {
   return {
     ads: out,
     queries: QUERIES,
+    windowDays: days || null,
     filters: {
       minViews: MIN_VIEWS,
       durationSeconds: [MIN_SECS, MAX_SECS],
+      publishedWithinDays: days || 'all time',
       rejected: 'archive/fan channels, and titles that discuss an ad rather than being one'
     }
   };

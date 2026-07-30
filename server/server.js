@@ -158,14 +158,19 @@ async function discovered(req, res, url) {
     return json(res, 200, { ok: false, reason: 'YOUTUBE_API_KEY is not set.', ads: [] });
   }
   const limit = Math.min(Number(url.searchParams.get('limit')) || 24, 60);
+  /* Default to the last year. The archive asks for days=0 explicitly. */
+  const days = url.searchParams.has('days')
+    ? Math.min(Math.max(Number(url.searchParams.get('days')) || 0, 0), 7300)
+    : 365;
   try {
-    const r = await cache.through('discover', TTL.discover, () => discover.sweep());
+    const r = await cache.through(`discover_${days}`, TTL.discover, () => discover.sweep({ days }));
     json(res, 200, {
       ok: true,
       cached: r.cached,
       fetchedAt: new Date(r.savedAt).toISOString(),
       total: r.data.ads.length,
       queries: r.data.queries,
+      windowDays: r.data.windowDays,
       filters: r.data.filters,
       ads: r.data.ads.slice(0, limit)
     });
@@ -271,7 +276,7 @@ async function recipeFor(req, res, url) {
    every time a file is added. Allowlist instead: the page, its assets, and
    the handful of files a browser asks for by convention. Anything else —
    package.json, README, scripts/, the git checkout — is not web content. */
-const PUBLIC_FILES = new Set(['/index.html', '/privacy.html', '/terms.html', '/favicon.ico', '/robots.txt', '/sitemap.xml']);
+const PUBLIC_FILES = new Set(['/index.html', '/privacy.html', '/terms.html', '/admin.html', '/favicon.ico', '/robots.txt', '/sitemap.xml']);
 const servable = rel => PUBLIC_FILES.has(rel) || rel.startsWith('/assets/');
 
 function serveStatic(req, res, url) {

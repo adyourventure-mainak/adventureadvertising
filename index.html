@@ -94,7 +94,8 @@
     <nav class="nav__links" id="navLinks" aria-label="Primary">
       <a href="#watch">Competitor watch</a>
       <a href="#festivals">Calendar</a>
-      <a href="#gallery">Library</a>
+      <a href="#recent">Live ads</a>
+      <a href="#gallery">Archive</a>
       <a href="#principles">Why they travel</a>
       <a href="#builder">Brief builder</a>
       <a href="#ethics">Ground rules</a>
@@ -174,10 +175,10 @@
     <div class="container">
       <header class="section__head">
         <div>
-          <p class="eyebrow">The library</p>
-          <h2>Most-watched, and what made them watchable</h2>
+          <p class="eyebrow">Archive</p>
+          <h2>All-time highest views, taken apart</h2>
         </div>
-        <p class="section__note">Every count here is read live from the brand's own YouTube upload. Filter by the structure you could actually afford to shoot.</p>
+        <p class="section__note">The campaigns worth studying rather than copying — decade-old work whose structure still holds. Counts are read live from each brand's own upload. For what is running now, see <a href="#recent">Live ads</a>.</p>
       </header>
 
       <div class="filters" role="group" aria-label="Filter the library">
@@ -187,6 +188,33 @@
 
       <p class="results" id="results" role="status" aria-live="polite"></p>
       <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────── LIVE ADS ─────────────────────────── -->
+  <section id="recent" class="section">
+    <div class="container">
+      <header class="section__head">
+        <div>
+          <p class="eyebrow">Live ads</p>
+          <h2>What is running this year</h2>
+        </div>
+        <p class="section__note">Found automatically on YouTube, published in the last twelve months, ranked by real view count. Most of these were <em>placed</em> in front of people — the median is 0.01 likes per thousand views. The badge marks the rare ad an audience actually chose to watch.</p>
+      </header>
+
+      <div class="filters" role="group" aria-label="Time window">
+        <div class="filters__row" id="recentWindow">
+          <button class="chip" type="button" data-days="90" aria-pressed="false">Last 3 months</button>
+          <button class="chip" type="button" data-days="365" aria-pressed="true">Last 12 months</button>
+        </div>
+        <div class="filters__row filters__row--sub" id="recentSort">
+          <button class="chip" type="button" data-sort="views" aria-pressed="true">Most viewed</button>
+          <button class="chip" type="button" data-sort="earned" aria-pressed="false">Earned attention</button>
+        </div>
+      </div>
+
+      <p class="results" id="recentStatus" role="status" aria-live="polite">Loading…</p>
+      <ol class="wlist" id="recentList"></ol>
     </div>
   </section>
 
@@ -424,7 +452,7 @@
     </div>
     <nav aria-label="Library">
       <h4>Library</h4>
-      <ul><li><a href="#gallery">Every campaign</a></li><li><a href="#gallery" data-jump="stunt">Stunt &amp; demo</a></li><li><a href="#gallery" data-jump="emotional">Emotional turn</a></li><li><a href="#gallery" data-jump="comedy">Comedy</a></li></ul>
+      <ul><li><a href="#recent">Live ads</a></li><li><a href="#gallery">Archive</a></li><li><a href="#gallery" data-jump="stunt">Stunt &amp; demo</a></li><li><a href="#gallery" data-jump="emotional">Emotional turn</a></li><li><a href="#gallery" data-jump="comedy">Comedy</a></li></ul>
     </nav>
     <nav aria-label="Make one">
       <h4>Make one</h4>
@@ -459,6 +487,7 @@
 <script src="assets/watched.js"></script>
 <script src="assets/watch.js"></script>
 <script src="assets/festivals.js"></script>
+<script src="assets/recent.js"></script>
 <script type="module" src="assets/watchstore.js"></script>
 <script type="module" src="assets/auth.js"></script>
 </body>

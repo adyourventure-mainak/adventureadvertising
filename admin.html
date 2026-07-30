@@ -1,0 +1,37 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Adventure Advertising</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+
+<main class="legal">
+  <div class="container">
+    <p class="eyebrow"><a href="/">← Adventure Advertising</a></p>
+    <h1>Admin</h1>
+    <p class="legal__meta" id="adminWho">Checking your account…</p>
+
+    <div id="adminGate" hidden>
+      <div class="legal__summary">
+        <h2>Not your account</h2>
+        <p id="adminGateMsg"></p>
+      </div>
+    </div>
+
+    <div id="adminBody" hidden>
+      <div class="stats" id="adminStats"></div>
+
+      <h2>Signed-up users</h2>
+      <p class="wgroup__basis" id="usersNote"></p>
+      <div class="legal__table-wrap"><table class="legal__table" id="usersTable"></table></div>
+
+      <h2>Watchlists</h2>
+      <p class="wgroup__basis">Which brands people are monitoring — the clearest signal of what the product is actually being used for.</p>
+      <div class="legal__table-wrap"><table class="legal__table" id="watchTable"></table></div>
+    </div>
+  </div>
+</main>
+
+<script type="module" src="assets/admin.js"></script>
