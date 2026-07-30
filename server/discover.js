@@ -32,11 +32,18 @@ const KEY = () => process.env.YOUTUBE_API_KEY || '';
 /* Ad-intent queries. Broad enough to surface work from any market,
    narrow enough that most results are actually advertising. */
 const QUERIES = (process.env.DISCOVER_QUERIES || [
+  /* India first — it is the home market, and unlike Meta's archive
+     YouTube carries Indian campaigns with their real numbers. Hitachi
+     India, Kia India, Dabur, Xiaomi India and Flipkart all sit in the
+     100M+ range on their own channels. */
+  'indian tv commercial ad',
+  'hindi ad film brand',
+  'india brand campaign official',
+  /* Then the global set. */
   'official commercial ad',
   'big game commercial official',
   'brand campaign film official',
-  'official tv advert',
-  'commercial official brand india'
+  'official tv advert'
 ].join('|')).split('|').map(s => s.trim()).filter(Boolean);
 
 /* Channel names that mean "someone else's ad, re-hosted". */

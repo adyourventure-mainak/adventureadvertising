@@ -229,6 +229,26 @@ this".
 One honest caveat on the Meta boards: most ads run on Facebook *and* Instagram, so the
 two lists overlap heavily. The platform tag is what Meta reports per creative.
 
+**Indian ads are not meaningfully in Meta's archive**, and this was measured rather
+than assumed. Indian brands do appear, but only their EU-diaspora campaigns, with
+reach numbers that are noise:
+
+| Brand | Top EU reach |
+| --- | --- |
+| Myntra | 8 |
+| Swiggy Instamart | 8 |
+| Zomato | 2 |
+| Nykaa Fashion | 2 |
+
+Eight people. `euReach` counts EU accounts only, so an Indian brand's actual Indian
+campaign is invisible. Pointing the Meta boards at Indian brand names would empty
+them, not localise them.
+
+**Indian advertising lives on YouTube instead**, with real numbers on the brands' own
+channels — Hitachi India 333M, Kia India 233M, Alpenliebe 180M, Dabur 146M, Xiaomi
+India 134M, Flipkart 118M. So `DISCOVER_QUERIES` leads with Indian ad-intent terms,
+and that is where the home market is actually served.
+
 ## AI breakdowns are backend-only
 
 `/api/recipe` still exists and works (see below) but is **not rendered on the site**.
